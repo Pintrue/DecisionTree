@@ -15,10 +15,19 @@ def load_data(dataset):
     file_path = os.path.join('wifi_db', file_name)
     
     data = np.loadtxt(file_path)
-    print(data)
+    # print(data)
     return data
 
+def find_split(dataset):
+    pass
 
 
+def decision_tree_learning(training_dataset, depth):
+    pass
 
-load_data('clean')
+
+def info_gain(all, left, right):
+    pass
+
+
+# load_data('clean')
