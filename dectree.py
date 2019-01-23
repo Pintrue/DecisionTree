@@ -1,6 +1,11 @@
 import os
-import numpy
+import numpy as np
 
+'''
+load_data/1 returns an array containing the data
+from a file specified by argument dataset, which
+can either be clean or noisy.
+'''
 def load_data(dataset):
     file_name = ''
     if dataset == 'clean':
@@ -9,7 +14,11 @@ def load_data(dataset):
         file_name = 'noisy_dataset.txt'
     file_path = os.path.join('wifi_db', file_name)
     
+    data = np.loadtxt(file_path)
+    print(data)
+    return data
 
-    # print(file_path)
 
-# load_data('noisy')
+
+
+load_data('clean')
