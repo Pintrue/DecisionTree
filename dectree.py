@@ -2,6 +2,7 @@ import os
 import numpy as np
 import functools as ft
 import math
+import pydot
 
 WIFI_NUM = 7
 LABEL_IDX = WIFI_NUM
@@ -30,7 +31,9 @@ def load_data(dataset):
 
 def decision_tree_learning(dataset, depth):
     if same_label(dataset):
-        return (dataset, depth)
+        node = {'leaf': True,
+                'room': dataset[0][LABEL_IDX]}
+        return (node, depth)
     else:
         (s_attr, s_val, l_dataset, r_dataset) = find_split(dataset)
         (l_branch, l_depth) = decision_tree_learning(l_dataset, depth + 1)
@@ -39,16 +42,19 @@ def decision_tree_learning(dataset, depth):
         node = {'attr': s_attr,
                 'val': s_val,
                 'left': l_branch,
-                'right': r_branch}
+                'right': r_branch,
+                'leaf': False}
 
         return (node, max(l_depth, r_depth))
 
 def cmp_data_tuple(t1, t2, wifi):
 	return t1[wifi] - t2[wifi]
 
-#pre: the wifi column is sorted, dataset must be N * 8
-#post: dataset content might be changed
-#return: (splitidx, infogain, splitval)
+'''
+pre: the wifi column is sorted, dataset must be N * 8
+post: dataset content might be changed
+return: (splitidx, infogain, splitval)
+'''
 def find_best_split(dataset, wifi):
 	last = dataset[0][wifi]
 	sleft = []
@@ -88,7 +94,7 @@ def find_split(dataset):
 			max_info_gain = ig[2]
 			max_tuple = ig
 	i = max_tuple[1]
-	return (max_tuple[0],max_tuple[3],dataset[:i],dataset[:i])
+	return (max_tuple[0],max_tuple[3],dataset[:i],dataset[i:])
 
 '''
 Verify if all labels in the dataset are the same:
@@ -96,6 +102,9 @@ if a label different from the first label appears,
 exit early without checking the rest.
 '''
 def same_label(dataset):
+    if len(dataset) == 0:
+        return True
+
     comp = dataset[0][LABEL_IDX]
     for data in dataset:
         if data[LABEL_IDX] != comp:
@@ -104,8 +113,8 @@ def same_label(dataset):
     return True
 
 def info_gain(l_dataset, r_dataset):
-    l_dataset_len = l_dataset.shape[0]
-    r_dataset_len = r_dataset.shape[0]
+    l_dataset_len = len(l_dataset)
+    r_dataset_len = len(r_dataset)
     dataset_len = l_dataset_len + r_dataset_len
 
     remainder = (l_dataset_len / dataset_len) * cal_entropy(l_dataset) + (r_dataset_len / dataset_len) * cal_entropy(r_dataset)
@@ -114,7 +123,7 @@ def info_gain(l_dataset, r_dataset):
 
 
 def cal_entropy(dataset):
-    dataset_len = dataset.shape[0]
+    dataset_len = len(dataset)
     acc1 = 0
     acc2 = 0
     acc3 = 0
@@ -138,6 +147,40 @@ def cal_entropy(dataset):
 
     return t1 + t2 + t3 + t4
 
-# d = load_data('test')
+def draw(parent_name, child_name):
+    edge = pydot.Edge(parent_name, child_name)
+    graph.add_edge(edge)
+
+def visit(node, parent=None):
+    if node['leaf'] == False:
+        if parent:
+            draw(parent, str(node['attr']) + ' | %f' % node['val'])
+        visit(node['left'], str(node['attr']) + ' | %f' % node['val'])
+        visit(node['right'], str(node['attr']) + ' | %f' % node['val'])
+    else:
+        draw(parent, 'Room %f' % node['room'])
+
+            # if isinstance(v, dict):
+            #     # We start with the root node whose parent is None
+            #     # we don't want to graph the None node
+            #     if parent:
+            #         draw(parent, k)
+            #     visit(v, k)
+            # else:
+                # draw(parent, k)
+                # drawing the label using a distinct name
+                # draw(k, k+'_'+v)
+
+
+
+d = load_data('clean')
 # print(d)
 # print(same_label(d))
+t = decision_tree_learning(d, 0)
+
+# graph = pydot.Dot(graph_type='graph')
+# visit(t[0])
+# graph.write_png("1.png")
+
+print(t)
+
