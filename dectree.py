@@ -3,6 +3,7 @@ import numpy as np
 import functools as ft
 import math
 
+
 label_idx = 7
 
 '''
@@ -55,16 +56,18 @@ def cmp_data_tuple(t1, t2, wifi):
 #return: (splitidx, infogain, splitval)
 def find_best_split(dataset, wifi):
 	last = dataset[0][wifi]
+    last_label = dataset[0][LABEL_IDX]
 	sleft = []
 	sright = dataset
 	info_gains = []
 	i = 0
 	while len(sright) > 0:
 		t = sright[0]
-		if t[wifi] != last:
+		if t[wifi] != last or t[LABEL_IDX] != last_label:
 			splitval = (t[wifi] + last) / 2.0
 			info_gains.append((i, info_gain(sleft, sright), splitval))
 			last = t[wifi]
+            last_label = t[LABEL_IDX]
 		sleft.append(sright.pop(0))
 		i += 1
 	max_info_gain = -float("INF")
@@ -75,11 +78,10 @@ def find_best_split(dataset, wifi):
 			max_tuple = ig
 	return max_tuple
 
-
 #attribute, value, sleft, sright
 def find_split(dataset):
 	info_gains = []
-	for i in xrange(0, WIFI_NUM):
+	for i in range(0, WIFI_NUM):
 		sorted_dataset = sorted(dataset, \
 			key=ft.cmp_to_key( \
 			lambda x,y : cmp_data_tuple(x, y, i)))
@@ -92,7 +94,7 @@ def find_split(dataset):
 			max_info_gain = ig[2]
 			max_tuple = ig
 	i = max_tuple[1]
-	return (max_tuple[0],max_tuple[3],dataset[:i],dataset[:i])
+	return (max_tuple[0],max_tuple[3],dataset[:i],dataset[i:])
 
 '''
 Verify if all labels in the dataset are the same:
@@ -141,6 +143,7 @@ def cal_entropy(dataset):
     t4 = -p4 * math.log(p4,2) if p4 > 0 else 0
 
     return t1 + t2 + t3 + t4
+
 
 # d = load_data('test')
 # print(d)
