@@ -3,6 +3,8 @@ import numpy as np
 import functools as ft
 import math
 
+label_idx = 7
+
 '''
 load_data/1 returns an array containing the data
 from a file specified by argument dataset, which
@@ -14,11 +16,33 @@ def load_data(dataset):
         file_name = 'clean_dataset.txt'
     elif dataset == 'noisy':
         file_name = 'noisy_dataset.txt'
+    elif dataset == 'test':
+        file_name = 'test_dataset.txt'
+    else:
+        print("Unrecognized filename.")
+        return
+
     file_path = os.path.join('wifi_db', file_name)
 
     data = np.loadtxt(file_path)
     # print(data)
     return data
+
+def decision_tree_learning(dataset, depth):
+    if same_label(dataset):
+        return (dataset, depth)
+    else:
+        (s_attr, s_val, l_dataset, r_dataset) = find_split(dataset)
+        (l_branch, l_depth) = decision_tree_learning(l_dataset, depth + 1)
+        (r_branch, r_depth) = decision_tree_learning(r_dataset, depth + 1)
+
+        node = {'attr': s_attr,
+                'val': s_val,
+                'left': l_branch,
+                'right': r_branch}
+
+        return (node, max(l_depth, r_depth))
+
 
 WIFI_NUM = 7
 LABEL_IDX = WIFI_NUM
@@ -70,10 +94,18 @@ def find_split(dataset):
 	i = max_info_gain[0]
 	return (max_info_gain[1],max_info_gain[3],dataset[:i],dataset[:i])
 
+'''
+Verify if all labels in the dataset are the same:
+if a label different from the first label appears,
+exit early without checking the rest.
+'''
+def same_label(dataset):
+    comp = dataset[0][label_idx]
+    for data in dataset:
+        if data[label_idx] != comp:
+            return False
 
-def decision_tree_learning(training_dataset, depth):
-    pass
-
+    return True
 
 def info_gain(l_dataset, r_dataset):
     l_dataset_len = l_dataset.shape[0]
@@ -109,3 +141,7 @@ def cal_entropy(dataset):
     t4 = -p4 * math.log(p4,2) if p4 > 0 else 0
 
     return t1 + t2 + t3 + t4
+
+# d = load_data('test')
+# print(d)
+# print(same_label(d))
