@@ -87,8 +87,8 @@ def find_split(dataset):
 		if ig[2] > max_info_gain:
 			max_info_gain = ig[2]
 			max_tuple = ig
-	i = max_info_gain[0]
-	return (max_info_gain[1],max_info_gain[3],dataset[:i],dataset[:i])
+	i = max_tuple[1]
+	return (max_tuple[0],max_tuple[3],dataset[:i],dataset[:i])
 
 '''
 Verify if all labels in the dataset are the same:
