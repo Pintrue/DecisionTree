@@ -4,6 +4,7 @@ import functools as ft
 import math
 import pydot
 
+label_idx = 7
 WIFI_NUM = 7
 LABEL_IDX = WIFI_NUM
 
@@ -57,16 +58,18 @@ return: (splitidx, infogain, splitval)
 '''
 def find_best_split(dataset, wifi):
 	last = dataset[0][wifi]
+    last_label = dataset[0][LABEL_IDX]
 	sleft = []
 	sright = dataset
 	info_gains = []
 	i = 0
 	while len(sright) > 0:
 		t = sright[0]
-		if t[wifi] != last:
+		if t[wifi] != last or t[LABEL_IDX] != last_label:
 			splitval = (t[wifi] + last) / 2.0
 			info_gains.append((i, info_gain(sleft, sright), splitval))
 			last = t[wifi]
+            last_label = t[LABEL_IDX]
 		sleft.append(sright.pop(0))
 		i += 1
 	max_info_gain = -float("INF")
@@ -76,7 +79,6 @@ def find_best_split(dataset, wifi):
 			max_info_gain = ig[1]
 			max_tuple = ig
 	return max_tuple
-
 
 #attribute, value, sleft, sright
 def find_split(dataset):
@@ -183,4 +185,3 @@ t = decision_tree_learning(d, 0)
 # graph.write_png("1.png")
 
 print(t)
-
