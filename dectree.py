@@ -28,7 +28,7 @@ def cmp_data_tuple(t1, t2, wifi):
 
 #pre: the wifi column is sorted, dataset must be N * 8
 #post: dataset content might be changed
-#return: (infogain, splitval, sleft, sright)
+#return: (splitidx, infogain, splitval)
 def find_best_split(dataset, wifi):
 	last = dataset[0][wifi]
 	sleft = []
@@ -49,8 +49,7 @@ def find_best_split(dataset, wifi):
 		if ig[1] > max_info_gain:
 			max_info_gain = ig[1]
 			max_tuple = ig
-	i = max_tuple[0]
-	return max_tuple[1:] + (sleft[:i], sleft[i:])
+	return max_tuple
 
 
 #attribute, value, sleft, sright
@@ -65,10 +64,11 @@ def find_split(dataset):
 	max_info_gain = -float("INF")
 	max_tuple = None
 	for ig in info_gains:
-		if ig[1] > max_info_gain:
-			max_info_gain = ig[1]
+		if ig[2] > max_info_gain:
+			max_info_gain = ig[2]
 			max_tuple = ig
-	return max_info_gain[0], max_info_gain[2:]
+	i = max_info_gain[0]
+	return (max_info_gain[1],max_info_gain[3],dataset[:i],dataset[:i])
 
 
 def decision_tree_learning(training_dataset, depth):
