@@ -3,7 +3,8 @@ import numpy as np
 import functools as ft
 import math
 
-label_idx = 7
+WIFI_NUM = 7
+LABEL_IDX = WIFI_NUM
 
 '''
 load_data/1 returns an array containing the data
@@ -25,7 +26,6 @@ def load_data(dataset):
     file_path = os.path.join('wifi_db', file_name)
 
     data = np.loadtxt(file_path)
-    # print(data)
     return data
 
 def decision_tree_learning(dataset, depth):
@@ -42,10 +42,6 @@ def decision_tree_learning(dataset, depth):
                 'right': r_branch}
 
         return (node, max(l_depth, r_depth))
-
-
-WIFI_NUM = 7
-LABEL_IDX = WIFI_NUM
 
 def cmp_data_tuple(t1, t2, wifi):
 	return t1[wifi] - t2[wifi]
@@ -79,7 +75,7 @@ def find_best_split(dataset, wifi):
 #attribute, value, sleft, sright
 def find_split(dataset):
 	info_gains = []
-	for i in xrange(0, WIFI_NUM):
+	for i in range(0, WIFI_NUM):
 		sorted_dataset = sorted(dataset, \
 			key=ft.cmp_to_key( \
 			lambda x,y : cmp_data_tuple(x, y, i)))
@@ -100,9 +96,9 @@ if a label different from the first label appears,
 exit early without checking the rest.
 '''
 def same_label(dataset):
-    comp = dataset[0][label_idx]
+    comp = dataset[0][LABEL_IDX]
     for data in dataset:
-        if data[label_idx] != comp:
+        if data[LABEL_IDX] != comp:
             return False
 
     return True
@@ -122,7 +118,7 @@ def cal_entropy(dataset):
     acc1 = 0
     acc2 = 0
     acc3 = 0
-    acc4 =0
+    acc4 = 0
 
     for index in range(dataset_len):
         if dataset[index][7] == 1: acc1 += 1
