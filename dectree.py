@@ -79,6 +79,7 @@ def find_best_split(dataset, wifi):
 			max_tuple = ig
 	return max_tuple
 
+
 #attribute, value, sleft, sright
 def find_split(dataset):
 	info_gains = []
@@ -95,7 +96,10 @@ def find_split(dataset):
 			max_info_gain = ig[2]
 			max_tuple = ig
 	i = max_tuple[1]
-	return (max_tuple[0],max_tuple[3],dataset[:i],dataset[i:])
+	sorted_dataset = sorted(dataset, \
+			key=ft.cmp_to_key( \
+			lambda x,y : cmp_data_tuple(x, y, max_tuple[0])))
+	return (max_tuple[0],max_tuple[3],sorted_dataset[:i],sorted_dataset[i:])
 
 '''
 Verify if all labels in the dataset are the same:
@@ -114,8 +118,8 @@ def same_label(dataset):
     return True
 
 def info_gain(l_dataset, r_dataset):
-    l_dataset_len = len(l_dataset)
-    r_dataset_len = len(r_dataset)
+    l_dataset_len = float(len(l_dataset))
+    r_dataset_len = float(len(r_dataset))
     dataset_len = l_dataset_len + r_dataset_len
 
     remainder = (l_dataset_len / dataset_len) * cal_entropy(l_dataset) + (r_dataset_len / dataset_len) * cal_entropy(r_dataset)
@@ -136,10 +140,10 @@ def cal_entropy(dataset):
         elif dataset[index][7] == 3: acc3 += 1
         elif dataset[index][7] == 4: acc4 += 1
 
-    p1 = acc1 / dataset_len
-    p2 = acc2 / dataset_len
-    p3 = acc3 / dataset_len
-    p4 = acc4 / dataset_len
+    p1 = float(acc1) / dataset_len
+    p2 = float(acc2) / dataset_len
+    p3 = float(acc3) / dataset_len
+    p4 = float(acc4) / dataset_len
 
     t1 = -p1 * math.log(p1,2) if p1 > 0 else 0
     t2 = -p2 * math.log(p2,2) if p2 > 0 else 0
