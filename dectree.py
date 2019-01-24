@@ -186,12 +186,12 @@ def visit(node, parent=None):
     else:
         draw(parent, 'Room %f' % node['room'])
 
-d = load_data('test')
+d = load_data('clean')
 #print(d)
 #print(same_label(d))
 t = decision_tree_learning(d, 0)
 
-tst = load_data('test')
+tst = load_data('clean')
 (w, t) = evaluate(t[0], tst)
 print("%d wrongly labeled, out of %d test data." % (w, t))
 
