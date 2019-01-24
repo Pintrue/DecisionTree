@@ -4,7 +4,6 @@ import functools as ft
 import math
 import pydot
 
-label_idx = 7
 WIFI_NUM = 7
 LABEL_IDX = WIFI_NUM
 
@@ -58,7 +57,7 @@ return: (splitidx, infogain, splitval)
 '''
 def find_best_split(dataset, wifi):
 	last = dataset[0][wifi]
-    last_label = dataset[0][LABEL_IDX]
+	last_label = dataset[0][LABEL_IDX]
 	sleft = []
 	sright = dataset
 	info_gains = []
@@ -69,7 +68,7 @@ def find_best_split(dataset, wifi):
 			splitval = (t[wifi] + last) / 2.0
 			info_gains.append((i, info_gain(sleft, sright), splitval))
 			last = t[wifi]
-            last_label = t[LABEL_IDX]
+			last_label = t[LABEL_IDX]
 		sleft.append(sright.pop(0))
 		i += 1
 	max_info_gain = -float("INF")
@@ -149,6 +148,27 @@ def cal_entropy(dataset):
 
     return t1 + t2 + t3 + t4
 
+def classify(node, data):
+	if node['leaf'] == True:
+		return node['room']
+	else:
+		attr, val, l, r, _ = node.values()
+		v = data[attr]
+		if v < val:
+			return classify(l, data)
+		else:
+			return classify(r, data)
+
+def evaluate(node, dataset):
+	wrong_set = []
+	for data in dataset:
+		res = classify(node, data)
+		if res != data[LABEL_IDX]:
+			wrong_set.append((data, res))
+	data_num = len(dataset)
+	wrong_num = len(wrong_set)
+	return (wrong_num, data_num)
+
 def draw(parent_name, child_name):
     edge = pydot.Edge(parent_name, child_name)
     graph.add_edge(edge)
@@ -162,26 +182,17 @@ def visit(node, parent=None):
     else:
         draw(parent, 'Room %f' % node['room'])
 
-            # if isinstance(v, dict):
-            #     # We start with the root node whose parent is None
-            #     # we don't want to graph the None node
-            #     if parent:
-            #         draw(parent, k)
-            #     visit(v, k)
-            # else:
-                # draw(parent, k)
-                # drawing the label using a distinct name
-                # draw(k, k+'_'+v)
-
-
-
 d = load_data('clean')
 # print(d)
 # print(same_label(d))
 t = decision_tree_learning(d, 0)
 
-# graph = pydot.Dot(graph_type='graph')
+tst = load_data('noisy')
+(w, t) = evaluate(t[0], tst)
+print("%d wrongly labeled, out of %d test data." % (w, t))
+
+graph = pydot.Dot(graph_type='graph')
 # visit(t[0])
 # graph.write_png("1.png")
 
-print(t)
+# print(t)
