@@ -29,6 +29,7 @@ def load_data(dataset):
     data = np.loadtxt(file_path)
     return data
 
+
 def decision_tree_learning(dataset, depth):
     if same_label(dataset):
         node = {'leaf': True,
@@ -50,37 +51,43 @@ def decision_tree_learning(dataset, depth):
 def cmp_data_tuple(t1, t2, wifi):
 	return t1[wifi] - t2[wifi]
 
+
 '''
 pre: the wifi column is sorted, dataset must be N * 8
 post: dataset content might be changed
 return: (splitidx, infogain, splitval)
 '''
 def find_best_split(dataset, wifi):
-	last = dataset[0][wifi]
-	last_label = dataset[0][LABEL_IDX]
-	sleft = []
-	sright = dataset
-	info_gains = []
-	i = 0
-	while len(sright) > 0:
-		t = sright[0]
-		if t[wifi] != last or t[LABEL_IDX] != last_label:
-			splitval = (t[wifi] + last) / 2.0
-			info_gains.append((i, info_gain(sleft, sright), splitval))
-			last = t[wifi]
-			last_label = t[LABEL_IDX]
-		sleft.append(sright.pop(0))
-		i += 1
-	max_info_gain = -float("INF")
-	max_tuple = None
-	for ig in info_gains:
-		if ig[1] > max_info_gain:
-			max_info_gain = ig[1]
-			max_tuple = ig
-	return max_tuple
+    last_data = dataset[0]
+    s_left = []
+    s_right = dataset
+    s_left.append(s_right.pop(0))
+
+    info_gains = []
+    
+    for i in range(len(s_right)):
+        if last_data[LABEL_IDX] != s_right[0][LABEL_IDX]:
+            if last_data[wifi] != s_right[0][wifi]:
+                split_val = (last_data[wifi] + s_right[0][wifi]) / 2.0
+                info_gains.append((i + 1, info_gain(s_left, s_right), split_val))
+        
+        last_data = s_right[0]
+        s_left.append(s_right.pop(0))
+
+    max_info_gain = -float("INF")
+    
+    if len(info_gains) == 0:
+        return (0, max_info_gain, 0)
+    
+    max_tuple = None
+    for ig in info_gains:
+        if ig[1] > max_info_gain:
+            max_info_gain = ig[1]
+            max_tuple = ig
+
+    return max_tuple
 
 
-#attribute, value, sleft, sright
 def find_split(dataset):
 	info_gains = []
 	for i in range(0, WIFI_NUM):
@@ -88,7 +95,9 @@ def find_split(dataset):
 			key=ft.cmp_to_key( \
 			lambda x,y : cmp_data_tuple(x, y, i)))
 		tp = find_best_split(sorted_dataset, i)
-		info_gains.append((i,) + tp)
+		if tp[1] != -float("INF"):
+			info_gains.append((i,) + tp + (sorted_dataset,))
+
 	max_info_gain = -float("INF")
 	max_tuple = None
 	for ig in info_gains:
@@ -100,6 +109,8 @@ def find_split(dataset):
 			key=ft.cmp_to_key( \
 			lambda x,y : cmp_data_tuple(x, y, max_tuple[0])))
 	return (max_tuple[0],max_tuple[3],sorted_dataset[:i],sorted_dataset[i:])
+
+
 
 '''
 Verify if all labels in the dataset are the same:
@@ -135,10 +146,10 @@ def cal_entropy(dataset):
     acc4 = 0
 
     for index in range(dataset_len):
-        if dataset[index][7] == 1: acc1 += 1
-        elif dataset[index][7] == 2: acc2 += 1
-        elif dataset[index][7] == 3: acc3 += 1
-        elif dataset[index][7] == 4: acc4 += 1
+        if dataset[index][LABEL_IDX] == 1: acc1 += 1
+        elif dataset[index][LABEL_IDX] == 2: acc2 += 1
+        elif dataset[index][LABEL_IDX] == 3: acc3 += 1
+        elif dataset[index][LABEL_IDX] == 4: acc4 += 1
 
     p1 = float(acc1) / dataset_len
     p2 = float(acc2) / dataset_len
