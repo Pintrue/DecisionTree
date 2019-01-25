@@ -48,6 +48,7 @@ def decision_tree_learning(dataset, depth):
 
         return (node, max(l_depth, r_depth))
 
+
 def cmp_data_tuple(t1, t2, wifi):
 	return t1[wifi] - t2[wifi]
 
@@ -111,7 +112,6 @@ def find_split(dataset):
 	return (max_tuple[0],max_tuple[3],sorted_dataset[:i],sorted_dataset[i:])
 
 
-
 '''
 Verify if all labels in the dataset are the same:
 if a label different from the first label appears,
@@ -127,6 +127,7 @@ def same_label(dataset):
             return False
 
     return True
+
 
 def info_gain(l_dataset, r_dataset):
     l_dataset_len = float(len(l_dataset))
@@ -163,6 +164,7 @@ def cal_entropy(dataset):
 
     return t1 + t2 + t3 + t4
 
+
 def classify(node, data):
 	if node['leaf'] == True:
 		return node['room']
@@ -174,6 +176,7 @@ def classify(node, data):
 		else:
 			return classify(r, data)
 
+
 def evaluate(node, dataset):
 	wrong_set = []
 	for data in dataset:
@@ -184,9 +187,11 @@ def evaluate(node, dataset):
 	wrong_num = len(wrong_set)
 	return (wrong_num, data_num)
 
+
 def draw(parent_name, child_name):
     edge = pydot.Edge(parent_name, child_name)
     graph.add_edge(edge)
+
 
 def visit(node, parent=None):
     if node['leaf'] == False:
@@ -197,9 +202,12 @@ def visit(node, parent=None):
     else:
         draw(parent, 'Room %f' % node['room'])
 
+
+'''
+Main program starts here
+'''
 d = load_data('clean')
-#print(d)
-#print(same_label(d))
+
 t = decision_tree_learning(d, 0)
 
 tst = load_data('clean')
