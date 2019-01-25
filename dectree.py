@@ -2,6 +2,7 @@ import os
 import numpy as np
 import functools as ft
 import math
+import random
 import pydot
 
 WIFI_NUM = 7
@@ -188,9 +189,39 @@ def evaluate(node, dataset):
 	return (wrong_num, data_num)
 
 
+'''
+Cross validate the dataset, across the number of
+fold it is separated into, which is specified by
+the 'fold_num' argument.
+'''
+def cross_validation(dataset, fold_num):
+    fold_len = int(len(dataset) / fold_num)
+    cv_result = []
+    for k in range(fold_num):
+        test_data = np.array(dataset[k * fold_len : (k+1) * fold_len])
+        train_data = np.array(dataset[: k * fold_len] + dataset[(k+1) * fold_len :])
+        
+        tree = decision_tree_learning(train_data, 0)
+        (wrong_num, _) = evaluate(tree[0], test_data)
+        cv_result.append((k, wrong_num))
+        print("Fold #%d has %d of wrongly labeled data, out of %d total data."
+                % (k, wrong_num, fold_len))
+    return cv_result
+
+
+'''
+Randomly shuffle the original dataset,
+which does not mutate the original dataset.
+Return the shuffled data in LIST.
+'''
+def shuffle_data(dataset):
+    shuffled = random.sample(dataset.tolist(), len(dataset))
+    return shuffled
+
+
 def draw(parent_name, child_name):
     edge = pydot.Edge(parent_name, child_name)
-    graph.add_edge(edge)
+    #graph.add_edge(edge)
 
 
 def visit(node, parent=None):
@@ -203,18 +234,26 @@ def visit(node, parent=None):
         draw(parent, 'Room %f' % node['room'])
 
 
+
 '''
 Main program starts here
 '''
 d = load_data('clean')
 
-t = decision_tree_learning(d, 0)
+# t = decision_tree_learning(d, 0)
 
-tst = load_data('clean')
-(w, t) = evaluate(t[0], tst)
-print("%d wrongly labeled, out of %d test data." % (w, t))
+# tst = load_data('clean')
+# (w, t) = evaluate(t[0], tst)
+# print("%d wrongly labeled, out of %d test data." % (w, t))
 
-graph = pydot.Dot(graph_type='graph')
+'''
+    10-fold cross validation
+'''
+shuffled_data = shuffle_data(d)
+cross_validation(shuffled_data, 10)
+
+
+# graph = pydot.Dot(graph_type='graph')
 # visit(t[0])
 # graph.write_png("1.png")
 
