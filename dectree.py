@@ -79,6 +79,7 @@ def find_best_split(dataset, wifi):
 	max_info_gain = -float("INF")
 	
 	if len(info_gains) == 0:
+		print("Cannot find a split for attribute %d" % wifi)
 		return (0, max_info_gain, 0)
 	
 	max_tuple = None
@@ -234,9 +235,8 @@ def visit(node, parent=None):
 		draw(parent, 'Room %f' % node['room'])
 
 
-
 '''
-	Main program starts here
+Main program starts here
 '''
 d = load_data('clean')
 
@@ -246,11 +246,10 @@ d = load_data('clean')
 # (w, t) = evaluate(t[0], tst)
 # print("%d wrongly labeled, out of %d test data." % (w, t))
 
-'''
-	10-fold cross validation
-'''
+# 10-fold cross validation
 shuffled_data = shuffle_data(d)
 cross_validation(shuffled_data, 10)
+
 
 
 # graph = pydot.Dot(graph_type='graph')
