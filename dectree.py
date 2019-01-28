@@ -140,43 +140,12 @@ def best_split(dataset, split_func):
 	return max_tuple
 
 def find_split(dataset):
-	# info_gains = []
-	# for i in range(0, WIFI_NUM):
-	# 	sorted_dataset = sorted(dataset, \
-	# 							key=ft.cmp_to_key( \
-	# 								lambda x, y: cmp_data_tuple(x, y, i)))
-	# 	tp = find_column_split(sorted_dataset, i)
-	# 	if tp[1] != -float("INF"):
-	# 		info_gains.append((i,) + tp + (sorted_dataset,))
-
-	# max_info_gain = -float("INF")
-	# max_tuple = None
-
-	# for ig in info_gains:
-	# 	if ig[2] > max_info_gain:
-	# 		max_info_gain = ig[2]
-	# 		max_tuple = ig
 	max_tuple = best_split(dataset, find_column_split)
 	
 	# If no split is found when there is any difference
 	# in labels, try to find any possible split values
 	# with the highest information gains.
 	if max_tuple == None:
-		# for i in range(WIFI_NUM):
-		# 	sorted_dataset = sorted(dataset, \
-		# 							key=ft.cmp_to_key( \
-		# 								lambda x, y: cmp_data_tuple(x, y, i)))
-		# 	tp = find_all_col_split(sorted_dataset, i)
-		# 	if tp != None:
-		# 		info_gains.append((i,) + tp + (sorted_dataset,))
-
-		# max_info_gain = -float("INF")
-		# max_tuple = None
-
-		# for ig in info_gains:
-		# 	if ig[2] > max_info_gain:
-		# 		max_info_gain = ig[2]
-		# 		max_tuple = ig
 		max_tuple = best_split(dataset, find_all_col_split)
 
 	i = max_tuple[1]
