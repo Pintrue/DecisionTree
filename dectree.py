@@ -13,8 +13,6 @@ load_data/1 returns an array containing the data
 from a file specified by argument dataset, which
 can either be clean or noisy.
 '''
-
-
 def load_data(dataset):
 	file_name = ''
 	if dataset == 'clean':
@@ -61,7 +59,6 @@ pre: the wifi column is sorted, dataset must be N * 8
 post: dataset content might be changed
 return: (splitidx, infogain, splitval)
 '''
-
 def find_column_split(dataset, wifi):
 	last_data = dataset[0]
 	s_left = []
@@ -82,7 +79,7 @@ def find_column_split(dataset, wifi):
 	max_info_gain = -float("INF")
 
 	if len(info_gains) == 0:
-		print("Cannot find a split for attribute %d" % wifi)
+		# print("Cannot find a split for attribute %d" % wifi)
 		return (0, max_info_gain, 0)
 
 	max_tuple = None
@@ -140,6 +137,7 @@ def best_split(dataset, split_func):
 	return max_tuple
 
 def find_split(dataset):
+	# max_tuple = best_split(dataset, find_all_col_split)
 	max_tuple = best_split(dataset, find_column_split)
 	
 	# If no split is found when there is any difference
@@ -160,8 +158,6 @@ Verify if all labels in the dataset are the same:
 if a label different from the first label appears,
 exit early without checking the rest.
 '''
-
-
 def same_label(dataset):
 	if len(dataset) == 0:
 		return True
@@ -243,8 +239,6 @@ Cross validate the dataset, across the number of
 fold it is separated into, which is specified by
 the 'fold_num' argument.
 '''
-
-
 def cross_validation(dataset, fold_num):
 	fold_len = int(len(dataset) / fold_num)
 	cv_result = []
@@ -265,8 +259,6 @@ Randomly shuffle the original dataset,
 which does not mutate the original dataset.
 Return the shuffled data in LIST.
 '''
-
-
 def shuffle_data(dataset):
 	shuffled = random.sample(dataset.tolist(), len(dataset))
 	return shuffled
