@@ -222,16 +222,25 @@ def classify(node, data):
 		else:
 			return classify(r, data)
 
+'''
+Validate the test set on the built decision tree,
+return a tuple consisting of three elements:
 
-def evaluate(node, dataset):
+wrong_num: number of incorrectly classified data
+data_num: total number of data that have been classfied
+wrong_set: set of the predicted and actual labels of
+			all incorrectly classified data
+'''
+def validate(node, dataset):
 	wrong_set = []
 	for data in dataset:
 		res = classify(node, data)
 		if res != data[LABEL_IDX]:
-			wrong_set.append((data, res))
+			# wrong_set.append((data, res))
+			wrong_set.append((data[LABEL_IDX], res))
 	data_num = len(dataset)
 	wrong_num = len(wrong_set)
-	return (wrong_num, data_num)
+	return (wrong_num, data_num, wrong_set)
 
 
 '''
@@ -247,7 +256,7 @@ def cross_validation(dataset, fold_num):
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
 
 		tree = decision_tree_learning(train_data, 0)
-		(wrong_num, _) = evaluate(tree[0], test_data)
+		(wrong_num, _, wrong_set) = validate(tree[0], test_data)
 		cv_result.append((k, wrong_num))
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 			  % (k, wrong_num, fold_len))
@@ -282,12 +291,12 @@ def shuffle_data(dataset):
 '''
 Main program starts here
 '''
-d = load_data('clean')
+d = load_data('noisy')
 
 # t = decision_tree_learning(d, 0)
 
 # tst = load_data('clean')
-# (w, t) = evaluate(t[0], tst)
+# (w, t) = validate(t[0], tst)
 # print("%d wrongly labeled, out of %d test data." % (w, t))
 
 # 10-fold cross validation
