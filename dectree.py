@@ -276,9 +276,14 @@ def cross_validation(dataset, fold_num):
 	confusion_mat = np.array(avg_confmat, dtype=np.float32)
 	print(confusion_mat)
 	
-	(tp, fp, fn, tn) = metrics(confusion_mat, 1)
-	print(tp, fp, fn, tn)
-
+	for index in range(1, 5):
+		(tp, fp, fn, tn) = metrics(confusion_mat, index)
+		recall = tp / (tp + fn)
+		precision = tp / (tp + fp)
+		class_rate = (tp + tn) / (tp + tn + fp + fn)
+		f1_ms = 2 * precision * recall / (precision + recall)
+		print(recall, precision, class_rate, f1_ms)
+	# print(tp, fp, fn, tn)
 
 	plt.imshow(confusion_mat)
 	plt.show()
@@ -321,7 +326,7 @@ def shuffle_data(dataset):
 '''
 Main program starts here
 '''
-d = load_data('noisy')
+d = load_data('clean')
 
 # t = decision_tree_learning(d, 0)
 
