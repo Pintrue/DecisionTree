@@ -300,7 +300,7 @@ def cross_validation_prune(dataset, fold_num):
 		train_data = np.array(rest_data[: k * fold_len] + dataset[(k + 1) * fold_len :])
 
 		tree = decision_tree_learning(train_data, 0)
-		pruned_t = prune(tree[0], validate_data)
+		pruned_t = prune(tree[0], tree[0], validate_data)
 		(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
 		(wrong_num2, _, wrong_set2, correct_set2) = evaluate(pruned_t, test_data)
 		# cv_result.append((k, wrong_num))
@@ -308,17 +308,40 @@ def cross_validation_prune(dataset, fold_num):
 		# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 		# 	  % (k, wrong_num, fold_len))
 
-
-def prune(node, validate_data):
+def prune(node, tree, validate_data):
 	if node['leaf'] == True:
 		return
-	
+
 	l_branch = node['left']
 	r_branch = node['right']
-
+	prune(l_branch, tree, validate_data)
+	prune(r_branch, tree, validate_data)
 	# if both branches are leaves, PRUNE.
 	if l_branch['leaf'] and r_branch['leaf']:
+		no_prune = evaluate(tree, validate_data)[0]
+		node['leaf'] = True
+		node['room'] = l_branch['room']
+		prune_to_l = evaluate(tree, validate_data)[0]
+		node['room'] = r_branch['room']
+		prune_to_r = evaluate(tree, validate_data)[0]
+		if prune_to_l < prune_to_r:
+			if prune_to_l < no_prune:
+				node['room'] = l_branch['room']
+				node['leaf'] = True
+				# clear other fields, todo
+			else:
+				node['leaf'] = False
+				del node['room']
+		else: # prune_to_r <= prune_to_l
+			if prune_to_r < no_prune:
+				node['room'] = r_branch['room']
+				node['leaf'] = True
+				# clear other fields, todo
+			else:
+				node['leaf'] = False
+				del node['room']
 		
+
 
 
 def metrics(confusion_mat, label):
@@ -339,7 +362,7 @@ def cal_avg_accuracy(confusion_mat):
 		f1_ms = 2 * precision * recall / (precision + recall)
 		print(recall, precision, class_rate, f1_ms)
 		res.append((index, recall, precision, class_rate, f1_ms))
-	
+
 	return res
 
 
