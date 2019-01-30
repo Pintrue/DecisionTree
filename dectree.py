@@ -265,7 +265,7 @@ def cross_validation(dataset, fold_num):
 		for wrong in wrong_set:
 			confusion_mat[wrong[0]][wrong[1]] += 1
 		for correct in correct_set:
-			confusion_mat[correct[correct]] += 1
+			confusion_mat[correct][correct] += 1
 	confusion_mat = map(lambda l : map(lambda x : x / 10.0, l), confusion_mat)
 	return (cv_result, confusion_mat)
 
