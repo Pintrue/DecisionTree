@@ -126,18 +126,18 @@ def best_split(dataset, split_func):
 
 	max_info_gain = -float("INF")
 	max_tuple = None
-	
+
 	for ig in info_gains:
 		if ig[2] > max_info_gain:
 			max_info_gain = ig[2]
 			max_tuple = ig
-	
+
 	return max_tuple
 
 def find_split(dataset):
 	# max_tuple = best_split(dataset, find_all_col_split)
 	max_tuple = best_split(dataset, find_column_split)
-	
+
 	# If no split is found when there is any difference
 	# in labels, try to find any possible split values
 	# with the highest information gains.
@@ -231,14 +231,17 @@ wrong_set: set of the predicted and actual labels of
 '''
 def evaluate(node, dataset):
 	wrong_set = []
+	correct_set = []
 	for data in dataset:
 		res = classify(node, data)
 		if res != data[LABEL_IDX]:
 			# wrong_set.append((data, res))
 			wrong_set.append((data[LABEL_IDX], res))
+		else:
+			correct_set.append((data[LABEL_IDX], res))
 	data_num = len(dataset)
 	wrong_num = len(wrong_set)
-	return (wrong_num, data_num, wrong_set)
+	return (wrong_num, data_num, wrong_set, correct_set)
 
 
 '''
@@ -249,16 +252,22 @@ the 'fold_num' argument.
 def cross_validation(dataset, fold_num):
 	fold_len = int(len(dataset) / fold_num)
 	cv_result = []
+	confusion_mat = [[0] * 4] * 4
 	for k in range(fold_num):
 		test_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
 
 		tree = decision_tree_learning(train_data, 0)
-		(wrong_num, _, wrong_set) = evaluate(tree[0], test_data)
+		(wrong_num, _, wrong_set, correct_set) = evaluate(tree[0], test_data)
 		cv_result.append((k, wrong_num))
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 			  % (k, wrong_num, fold_len))
-	return cv_result
+		for wrong in wrong_set:
+			confusion_mat[wrong[0]][wrong[1]] += 1
+		for correct in correct_set:
+			confusion_mat[correct[0]][correct[1]] += 1
+	confusion_mat = map(lambda l : map(lambda x : x / 10.0, l), confusion_mat)
+	return (cv_result, confusion_mat)
 
 
 '''
