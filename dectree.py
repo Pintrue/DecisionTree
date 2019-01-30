@@ -34,16 +34,15 @@ def load_data(dataset):
 	data = np.loadtxt(file_path)
 	return data
 
-
-def decision_tree_learning(dataset, depth):
+def decision_tree_raw(dataset, depth):
 	if same_label(dataset):
 		node = {'leaf': True,
 				'room': dataset[0][LABEL_IDX]}
 		return (node, depth)
 	else:
 		(s_attr, s_val, l_dataset, r_dataset) = find_split(dataset)
-		(l_branch, l_depth) = decision_tree_learning(l_dataset, depth + 1)
-		(r_branch, r_depth) = decision_tree_learning(r_dataset, depth + 1)
+		(l_branch, l_depth) = decision_tree_raw(l_dataset, depth + 1)
+		(r_branch, r_depth) = decision_tree_raw(r_dataset, depth + 1)
 
 		node = {'attr': s_attr,
 				'val': s_val,
@@ -52,6 +51,11 @@ def decision_tree_learning(dataset, depth):
 				'leaf': False}
 
 		return (node, max(l_depth, r_depth))
+
+def decision_tree_learning(dataset):
+	raw_tree = decision_tree_raw(dataset, 0)
+	# prune here, Zhendong Fu will carry us!!!!!!
+	return raw_tree
 
 
 def cmp_data_tuple(t1, t2, wifi):
@@ -262,7 +266,7 @@ def cross_validation(dataset, fold_num):
 		test_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
 
-		tree = decision_tree_learning(train_data, 0)
+		tree = decision_tree_learning(train_data)
 		(wrong_num, _, wrong_set, correct_set) = evaluate(tree[0], test_data)
 		cv_result.append((k, wrong_num))
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
