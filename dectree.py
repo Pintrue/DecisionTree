@@ -3,6 +3,7 @@ import numpy as np
 import functools as ft
 import math
 import random
+import matplotlib.pyplot as plt
 # import pydot
 
 WIFI_NUM = 7
@@ -236,9 +237,9 @@ def evaluate(node, dataset):
 		res = classify(node, data)
 		if res != data[LABEL_IDX]:
 			# wrong_set.append((data, res))
-			wrong_set.append((data[LABEL_IDX], res))
+			wrong_set.append((int(data[LABEL_IDX]), int(res)))
 		else:
-			correct_set.append(res)
+			correct_set.append(int(res))
 	data_num = len(dataset)
 	wrong_num = len(wrong_set)
 	return (wrong_num, data_num, wrong_set, correct_set)
@@ -252,7 +253,7 @@ the 'fold_num' argument.
 def cross_validation(dataset, fold_num):
 	fold_len = int(len(dataset) / fold_num)
 	cv_result = []
-	confusion_mat = [[0] * 4] * 4
+	confusion_mat = np.full((4, 4), 0)
 	for k in range(fold_num):
 		test_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
@@ -263,10 +264,16 @@ def cross_validation(dataset, fold_num):
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 			  % (k, wrong_num, fold_len))
 		for wrong in wrong_set:
-			confusion_mat[wrong[0]][wrong[1]] += 1
+			confusion_mat[wrong[0] - 1][wrong[1] - 1] += 1
 		for correct in correct_set:
-			confusion_mat[correct][correct] += 1
-	confusion_mat = map(lambda l : map(lambda x : x / 10.0, l), confusion_mat)
+			confusion_mat[correct - 1][correct - 1] += 1
+		#print(confusion_mat)
+	avg_confmat = list(map(lambda l : list(map(lambda x : x / 10.0, l)), confusion_mat))
+	#print(avg_confmat)
+	confusion_mat = np.array(avg_confmat, dtype=np.float32)
+	print(confusion_mat)
+	plt.imshow(confusion_mat)
+	plt.show()
 	return (cv_result, confusion_mat)
 
 
