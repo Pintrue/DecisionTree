@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 
 WIFI_NUM = 7
 LABEL_IDX = WIFI_NUM
+LABEL_NUM = 4
+LABEL_START = 1
+LABEL_END = LABEL_NUM
 
 '''
 load_data/1 returns an array containing the data
@@ -253,7 +256,7 @@ the 'fold_num' argument.
 def cross_validation(dataset, fold_num):
 	fold_len = int(len(dataset) / fold_num)
 	cv_result = []
-	confusion_mat = np.full((4, 4), 0)
+	confusion_mat = np.full((LABEL_NUM, LABEL_NUM), 0)
 
 	for k in range(fold_num):
 		test_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
@@ -265,7 +268,7 @@ def cross_validation(dataset, fold_num):
 
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 			  % (k, wrong_num, fold_len))
-		
+
 		for wrong in wrong_set:
 			confusion_mat[wrong[0] - 1][wrong[1] - 1] += 1
 		for correct in correct_set:
@@ -275,8 +278,8 @@ def cross_validation(dataset, fold_num):
 	#print(avg_confmat)
 	confusion_mat = np.array(avg_confmat, dtype=np.float32)
 	print(confusion_mat)
-	
-	for index in range(1, 5):
+
+	for index in range(LABEL_START, LABEL_END):
 		(tp, fp, fn, tn) = metrics(confusion_mat, index)
 		recall = tp / (tp + fn)
 		precision = tp / (tp + fp)
@@ -286,7 +289,7 @@ def cross_validation(dataset, fold_num):
 
 	plt.imshow(confusion_mat)
 	plt.show()
-	
+
 	return (cv_result, confusion_mat)
 
 
