@@ -262,6 +262,7 @@ def cross_validation(dataset, fold_num):
 		tree = decision_tree_learning(train_data, 0)
 		(wrong_num, _, wrong_set, correct_set) = evaluate(tree[0], test_data)
 		cv_result.append((k, wrong_num))
+
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 			  % (k, wrong_num, fold_len))
 		
@@ -269,7 +270,6 @@ def cross_validation(dataset, fold_num):
 			confusion_mat[wrong[0] - 1][wrong[1] - 1] += 1
 		for correct in correct_set:
 			confusion_mat[correct - 1][correct - 1] += 1
-		#print(confusion_mat)
 
 	avg_confmat = list(map(lambda l : list(map(lambda x : x / 10.0, l)), confusion_mat))
 	#print(avg_confmat)
@@ -283,7 +283,6 @@ def cross_validation(dataset, fold_num):
 		class_rate = (tp + tn) / (tp + tn + fp + fn)
 		f1_ms = 2 * precision * recall / (precision + recall)
 		print(recall, precision, class_rate, f1_ms)
-	# print(tp, fp, fn, tn)
 
 	plt.imshow(confusion_mat)
 	plt.show()
@@ -297,6 +296,7 @@ def metrics(confusion_mat, label):
 	fn = np.sum(confusion_mat, axis=1)[label - 1] - tp
 	tn = confusion_mat.trace() - tp
 	return (tp, fp, fn, tn)
+
 
 '''
 Randomly shuffle the original dataset,
