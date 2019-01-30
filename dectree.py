@@ -238,7 +238,7 @@ def evaluate(node, dataset):
 			# wrong_set.append((data, res))
 			wrong_set.append((data[LABEL_IDX], res))
 		else:
-			correct_set.append((data[LABEL_IDX], res))
+			correct_set.append(res)
 	data_num = len(dataset)
 	wrong_num = len(wrong_set)
 	return (wrong_num, data_num, wrong_set, correct_set)
@@ -265,7 +265,7 @@ def cross_validation(dataset, fold_num):
 		for wrong in wrong_set:
 			confusion_mat[wrong[0]][wrong[1]] += 1
 		for correct in correct_set:
-			confusion_mat[correct[0]][correct[1]] += 1
+			confusion_mat[correct[correct]] += 1
 	confusion_mat = map(lambda l : map(lambda x : x / 10.0, l), confusion_mat)
 	return (cv_result, confusion_mat)
 
