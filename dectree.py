@@ -93,18 +93,16 @@ def find_column_split(dataset, wifi):
 
 def find_all_col_split(dataset, wifi):
 	last = dataset[0][wifi]
-	last_label = dataset[0][LABEL_IDX]
 	sleft = []
 	sright = dataset
 	info_gains = []
 	i = 0
 	while len(sright) > 0:
 		t = sright[0]
-		if t[wifi] != last or t[LABEL_IDX] != last_label:
+		if t[wifi] != last:
 			splitval = (t[wifi] + last) / 2.0
 			info_gains.append((i, info_gain(sleft, sright), splitval))
 			last = t[wifi]
-			last_label = t[LABEL_IDX]
 		sleft.append(sright.pop(0))
 		i += 1
 	max_info_gain = -float("INF")
