@@ -34,6 +34,7 @@ def load_data(dataset):
 	data = np.loadtxt(file_path)
 	return data
 
+
 def decision_tree_learning(dataset, depth):
 	if same_label(dataset):
 		node = {'leaf': True,
@@ -137,6 +138,7 @@ def best_split(dataset, split_func):
 
 	return max_tuple
 
+
 def find_split(dataset):
 	# max_tuple = best_split(dataset, find_all_col_split)
 	max_tuple = best_split(dataset, find_column_split)
@@ -223,6 +225,7 @@ def classify(node, data):
 		else:
 			return classify(r, data)
 
+
 '''
 Validate the test set on the built decision tree,
 return a tuple consisting of three elements:
@@ -232,11 +235,11 @@ data_num: total number of data that have been classfied
 wrong_set: set of the predicted and actual labels of
 			all incorrectly classified data
 '''
-def evaluate(node, dataset):
+def evaluate(root, dataset):
 	wrong_set = []
 	correct_set = []
 	for data in dataset:
-		res = classify(node, data)
+		res = classify(root, data)
 		if res != data[LABEL_IDX]:
 			# wrong_set.append((data, res))
 			wrong_set.append((int(data[LABEL_IDX]), int(res)))
@@ -297,13 +300,25 @@ def cross_validation_prune(dataset, fold_num):
 		train_data = np.array(rest_data[: k * fold_len] + dataset[(k + 1) * fold_len :])
 
 		tree = decision_tree_learning(train_data, 0)
-		pruned_t = prune(tree, validate_data)
+		pruned_t = prune(tree[0], validate_data)
 		(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
 		(wrong_num2, _, wrong_set2, correct_set2) = evaluate(pruned_t, test_data)
 		# cv_result.append((k, wrong_num))
 
 		# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 		# 	  % (k, wrong_num, fold_len))
+
+
+def prune(node, validate_data):
+	if node['leaf'] == True:
+		return
+	
+	l_branch = node['left']
+	r_branch = node['right']
+
+	# if both branches are leaves, PRUNE.
+	if l_branch['leaf'] and r_branch['leaf']:
+		
 
 
 def metrics(confusion_mat, label):
