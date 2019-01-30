@@ -287,7 +287,14 @@ def cross_validation(dataset, fold_num):
 		f1_ms = 2 * precision * recall / (precision + recall)
 		print(recall, precision, class_rate, f1_ms)
 
-	plt.imshow(confusion_mat)
+	plt.imshow(confusion_mat, cmap=plt.cm.Blues)
+	classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
+	plt.title('Confusion Matrix - Average Cross Validation Classification Results')
+	plt.ylabel('Actual label')
+	plt.xlabel('Predicted label')
+	tick_marks = np.arange(len(classNames))
+	plt.xticks(tick_marks, classNames, rotation=45)
+	plt.yticks(tick_marks, classNames)
 	plt.show()
 
 	return (cv_result, confusion_mat)
