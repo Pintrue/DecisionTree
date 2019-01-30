@@ -10,7 +10,7 @@ WIFI_NUM = 7
 LABEL_IDX = WIFI_NUM
 LABEL_NUM = 4
 LABEL_START = 1
-LABEL_END = LABEL_NUM
+LABEL_END = 5
 
 '''
 load_data/1 returns an array containing the data
@@ -34,15 +34,15 @@ def load_data(dataset):
 	data = np.loadtxt(file_path)
 	return data
 
-def decision_tree_raw(dataset, depth):
+def decision_tree_learning(dataset, depth):
 	if same_label(dataset):
 		node = {'leaf': True,
 				'room': dataset[0][LABEL_IDX]}
 		return (node, depth)
 	else:
 		(s_attr, s_val, l_dataset, r_dataset) = find_split(dataset)
-		(l_branch, l_depth) = decision_tree_raw(l_dataset, depth + 1)
-		(r_branch, r_depth) = decision_tree_raw(r_dataset, depth + 1)
+		(l_branch, l_depth) = decision_tree_learning(l_dataset, depth + 1)
+		(r_branch, r_depth) = decision_tree_learning(r_dataset, depth + 1)
 
 		node = {'attr': s_attr,
 				'val': s_val,
@@ -51,11 +51,6 @@ def decision_tree_raw(dataset, depth):
 				'leaf': False}
 
 		return (node, max(l_depth, r_depth))
-
-def decision_tree_learning(dataset):
-	raw_tree = decision_tree_raw(dataset, 0)
-	# prune here, Zhendong Fu will carry us!!!!!!
-	return raw_tree
 
 
 def cmp_data_tuple(t1, t2, wifi):
@@ -263,11 +258,11 @@ def cross_validation(dataset, fold_num):
 	confusion_mat = np.full((LABEL_NUM, LABEL_NUM), 0)
 
 	for k in range(fold_num):
-		test_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
+		validate_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
 
-		tree = decision_tree_learning(train_data)
-		(wrong_num, _, wrong_set, correct_set) = evaluate(tree[0], test_data)
+		tree = decision_tree_learning(train_data, 0)
+		(wrong_num, _, wrong_set, correct_set) = evaluate(tree[0], validate_data)
 		cv_result.append((k, wrong_num))
 
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
@@ -283,6 +278,44 @@ def cross_validation(dataset, fold_num):
 	confusion_mat = np.array(avg_confmat, dtype=np.float32)
 	print(confusion_mat)
 
+	cal_avg_accuracy(confusion_mat)
+	plot_cm(confusion_mat)
+
+	return (cv_result, confusion_mat)
+
+
+def cross_validation_prune(dataset, fold_num):
+	fold_len = int(len(dataset) / fold_num)
+	# cv_result = []
+	test_fold_index = random.randint(0, fold_num - 1)
+	test_data = np.array(dataset[test_fold_index * fold_len : (test_fold_index + 1) * fold_len])
+	rest_data = np.array(dataset[: test_fold_index * fold_len] +
+					dataset[(test_fold_index + 1) * fold_len :])
+
+	for k in range(fold_num - 1):
+		validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
+		train_data = np.array(rest_data[: k * fold_len] + dataset[(k + 1) * fold_len :])
+
+		tree = decision_tree_learning(train_data, 0)
+		pruned_t = prune(tree, validate_data)
+		(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
+		(wrong_num2, _, wrong_set2, correct_set2) = evaluate(pruned_t, test_data)
+		# cv_result.append((k, wrong_num))
+
+		# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
+		# 	  % (k, wrong_num, fold_len))
+
+
+def metrics(confusion_mat, label):
+	tp = confusion_mat[label - 1][label - 1]
+	fp = np.sum(confusion_mat, axis=0)[label - 1] - tp
+	fn = np.sum(confusion_mat, axis=1)[label - 1] - tp
+	tn = confusion_mat.trace() - tp
+	return (tp, fp, fn, tn)
+
+
+def cal_avg_accuracy(confusion_mat):
+	res = []
 	for index in range(LABEL_START, LABEL_END):
 		(tp, fp, fn, tn) = metrics(confusion_mat, index)
 		recall = tp / (tp + fn)
@@ -290,7 +323,12 @@ def cross_validation(dataset, fold_num):
 		class_rate = (tp + tn) / (tp + tn + fp + fn)
 		f1_ms = 2 * precision * recall / (precision + recall)
 		print(recall, precision, class_rate, f1_ms)
+		res.append((index, recall, precision, class_rate, f1_ms))
+	
+	return res
 
+
+def plot_cm(confusion_mat):
 	plt.imshow(confusion_mat, cmap=plt.cm.Blues)
 	classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
 	plt.title('Confusion Matrix - Average Cross Validation Classification Results')
@@ -300,16 +338,6 @@ def cross_validation(dataset, fold_num):
 	plt.xticks(tick_marks, classNames, rotation=45)
 	plt.yticks(tick_marks, classNames)
 	plt.show()
-
-	return (cv_result, confusion_mat)
-
-
-def metrics(confusion_mat, label):
-	tp = confusion_mat[label - 1][label - 1]
-	fp = np.sum(confusion_mat, axis=0)[label - 1] - tp
-	fn = np.sum(confusion_mat, axis=1)[label - 1] - tp
-	tn = confusion_mat.trace() - tp
-	return (tp, fp, fn, tn)
 
 
 '''
