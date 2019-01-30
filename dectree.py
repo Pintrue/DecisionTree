@@ -254,6 +254,7 @@ def cross_validation(dataset, fold_num):
 	fold_len = int(len(dataset) / fold_num)
 	cv_result = []
 	confusion_mat = np.full((4, 4), 0)
+
 	for k in range(fold_num):
 		test_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
@@ -263,19 +264,34 @@ def cross_validation(dataset, fold_num):
 		cv_result.append((k, wrong_num))
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 			  % (k, wrong_num, fold_len))
+		
 		for wrong in wrong_set:
 			confusion_mat[wrong[0] - 1][wrong[1] - 1] += 1
 		for correct in correct_set:
 			confusion_mat[correct - 1][correct - 1] += 1
 		#print(confusion_mat)
+
 	avg_confmat = list(map(lambda l : list(map(lambda x : x / 10.0, l)), confusion_mat))
 	#print(avg_confmat)
 	confusion_mat = np.array(avg_confmat, dtype=np.float32)
 	print(confusion_mat)
+	
+	(tp, fp, fn, tn) = metrics(confusion_mat, 1)
+	print(tp, fp, fn, tn)
+
+
 	plt.imshow(confusion_mat)
 	plt.show()
+	
 	return (cv_result, confusion_mat)
 
+
+def metrics(confusion_mat, label):
+	tp = confusion_mat[label - 1][label - 1]
+	fp = np.sum(confusion_mat, axis=0)[label - 1] - tp
+	fn = np.sum(confusion_mat, axis=1)[label - 1] - tp
+	tn = confusion_mat.trace() - tp
+	return (tp, fp, fn, tn)
 
 '''
 Randomly shuffle the original dataset,
