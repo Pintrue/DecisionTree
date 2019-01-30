@@ -231,7 +231,7 @@ data_num: total number of data that have been classfied
 wrong_set: set of the predicted and actual labels of
 			all incorrectly classified data
 '''
-def validate(node, dataset):
+def evaluate(node, dataset):
 	wrong_set = []
 	for data in dataset:
 		res = classify(node, data)
@@ -256,7 +256,7 @@ def cross_validation(dataset, fold_num):
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
 
 		tree = decision_tree_learning(train_data, 0)
-		(wrong_num, _, wrong_set) = validate(tree[0], test_data)
+		(wrong_num, _, wrong_set) = evaluate(tree[0], test_data)
 		cv_result.append((k, wrong_num))
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 			  % (k, wrong_num, fold_len))
