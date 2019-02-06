@@ -261,7 +261,7 @@ def cross_validation(dataset, fold_num):
 	confusion_mat = np.full((LABEL_NUM, LABEL_NUM), 0)
 
 	for k in range(fold_num):
-		validate_data = np.array(dataset[k * fold_len: (k + 1) * fold_len])
+		validate_data = np.array(dataset[k * fold_len : (k + 1) * fold_len])
 		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
 
 		tree = decision_tree_learning(train_data, 0)
@@ -318,7 +318,7 @@ def prune(node, validate_data):
 
 	# if both branches are leaves, PRUNE.
 	if l_branch['leaf'] and r_branch['leaf']:
-		
+		return 
 
 
 def metrics(confusion_mat, label):
