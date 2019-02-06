@@ -320,8 +320,8 @@ def prune_help(node, tree, validate_data):
 
 	l_branch = node['left']
 	r_branch = node['right']
-	prune(l_branch, tree, validate_data)
-	prune(r_branch, tree, validate_data)
+	prune_help(l_branch, tree, validate_data)
+	prune_help(r_branch, tree, validate_data)
 
 	# if both branches are leaves, PRUNE.
 	if l_branch['leaf'] and r_branch['leaf']:
@@ -349,15 +349,15 @@ def prune_help(node, tree, validate_data):
 				del node['room']
 
 def prune(tree, validate_data):
-    i = 0
-    while True:
-        this_wrong_num = evaluate(tree, validate_data)[0]
-        prune_help(tree, tree, validate_data)
-        next_wrong_num = evaluate(tree, validate_data)[0]
-        i += 1
-        print i
-        if this_wrong_num == next_wrong_num:
-            break
+	i = 0
+	while True:
+		this_wrong_num = evaluate(tree, validate_data)[0]
+		prune_help(tree, tree, validate_data)
+		next_wrong_num = evaluate(tree, validate_data)[0]
+		i += 1
+		print i
+		if this_wrong_num == next_wrong_num:
+			break
 
 
 def metrics(confusion_mat, label):
