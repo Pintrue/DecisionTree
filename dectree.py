@@ -302,7 +302,7 @@ def cross_validation_prune(dataset, fold_num):
 
 			tree = decision_tree_learning(train_data, 0)
 			(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
-			pruned_t = prune(tree[0], tree[0], validate_data)
+			pruned_t = prune(tree[0], validate_data)
 			(wrong_num2, _, wrong_set2, correct_set2) = evaluate(tree[0], test_data)
 
 			print(("Fold #%d has %d of wrong before pruning, " + \
@@ -314,7 +314,7 @@ def cross_validation_prune(dataset, fold_num):
 			# 	  % (k, wrong_num, fold_len))
 
 
-def prune(node, tree, validate_data):
+def prune_help(node, tree, validate_data):
 	if node['leaf'] == True:
 		return
 
@@ -348,7 +348,15 @@ def prune(node, tree, validate_data):
 				node['leaf'] = False
 				del node['room']
 
-
+def prune(tree, validate_data):
+    i = 0
+    while True:
+        this_wrong_num = evaluate(tree, validate_data)[0]
+        next_wrong_num = prune_help(tree, tree, validate_data)
+        i += 1
+        print i
+        if this_wrong_num == next_wrong_num:
+            break
 
 
 def metrics(confusion_mat, label):
