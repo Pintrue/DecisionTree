@@ -295,17 +295,18 @@ def cross_validation_prune(dataset, fold_num):
 		test_data = np.array(dataset[test_fold_index * fold_len : (test_fold_index + 1) * fold_len])
 		rest_data = dataset[: test_fold_index * fold_len] + \
 						dataset[(test_fold_index + 1) * fold_len :]
-
+		print("Choose Fold #%d as test fold" % test_fold_index)
 		for k in range(fold_num - 1):
 			validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
 			train_data = np.array(rest_data[: k * fold_len] + rest_data[(k + 1) * fold_len :])
 
 			tree = decision_tree_learning(train_data, 0)
 			(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
-			pruned_t = prune(tree[0], validate_data)
+			# pruned_t = prune(tree[0], validate_data)
+			prune(tree[0], validate_data)
 			(wrong_num2, _, wrong_set2, correct_set2) = evaluate(tree[0], test_data)
 
-			print(("Fold #%d has %d of wrong before pruning, " + \
+			print(("\tFold #%d has %d of wrong before pruning, " + \
 			"%d after pruning, out of %d total data.")
 					% (k, wrong_num1, wrong_num2, fold_len))
 			# cv_result.append((k, wrong_num))
@@ -355,7 +356,7 @@ def prune(tree, validate_data):
 		prune_help(tree, tree, validate_data)
 		next_wrong_num = evaluate(tree, validate_data)[0]
 		i += 1
-		print i
+		# print(i)
 		if this_wrong_num == next_wrong_num:
 			break
 
