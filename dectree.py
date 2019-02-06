@@ -290,35 +290,65 @@ def cross_validation(dataset, fold_num):
 def cross_validation_prune(dataset, fold_num):
 	fold_len = int(len(dataset) / fold_num)
 	# cv_result = []
-	test_fold_index = random.randint(0, fold_num - 1)
-	test_data = np.array(dataset[test_fold_index * fold_len : (test_fold_index + 1) * fold_len])
-	rest_data = np.array(dataset[: test_fold_index * fold_len] +
-					dataset[(test_fold_index + 1) * fold_len :])
+	# test_fold_index = random.randint(0, fold_num - 1)
+	for test_fold_index in range(fold_num):
+		test_data = np.array(dataset[test_fold_index * fold_len : (test_fold_index + 1) * fold_len])
+		rest_data = dataset[: test_fold_index * fold_len] + \
+						dataset[(test_fold_index + 1) * fold_len :]
 
-	for k in range(fold_num - 1):
-		validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
-		train_data = np.array(rest_data[: k * fold_len] + dataset[(k + 1) * fold_len :])
+		for k in range(fold_num - 1):
+			validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
+			train_data = np.array(rest_data[: k * fold_len] + rest_data[(k + 1) * fold_len :])
 
-		tree = decision_tree_learning(train_data, 0)
-		pruned_t = prune(tree[0], validate_data)
-		(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
-		(wrong_num2, _, wrong_set2, correct_set2) = evaluate(pruned_t, test_data)
-		# cv_result.append((k, wrong_num))
+			tree = decision_tree_learning(train_data, 0)
+			(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
+			pruned_t = prune(tree[0], tree[0], validate_data)
+			(wrong_num2, _, wrong_set2, correct_set2) = evaluate(tree[0], test_data)
 
-		# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
-		# 	  % (k, wrong_num, fold_len))
+			print(("Fold #%d has %d of wrong before pruning, " + \
+			"%d after pruning, out of %d total data.")
+					% (k, wrong_num1, wrong_num2, fold_len))
+			# cv_result.append((k, wrong_num))
+
+			# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
+			# 	  % (k, wrong_num, fold_len))
 
 
-def prune(node, validate_data):
+def prune(node, tree, validate_data):
 	if node['leaf'] == True:
 		return
-	
+
 	l_branch = node['left']
 	r_branch = node['right']
+	prune(l_branch, tree, validate_data)
+	prune(r_branch, tree, validate_data)
 
 	# if both branches are leaves, PRUNE.
 	if l_branch['leaf'] and r_branch['leaf']:
-		return 
+		no_prune = evaluate(tree, validate_data)[0]
+		node['leaf'] = True
+		node['room'] = l_branch['room']
+		prune_to_l = evaluate(tree, validate_data)[0]
+		node['room'] = r_branch['room']
+		prune_to_r = evaluate(tree, validate_data)[0]
+		if prune_to_l < prune_to_r:
+			if prune_to_l < no_prune:
+				node['room'] = l_branch['room']
+				node['leaf'] = True
+				# clear other fields, todo
+			else:
+				node['leaf'] = False
+				del node['room']
+		else: # prune_to_r <= prune_to_l
+			if prune_to_r < no_prune:
+				node['room'] = r_branch['room']
+				node['leaf'] = True
+				# clear other fields, todo
+			else:
+				node['leaf'] = False
+				del node['room']
+
+
 
 
 def metrics(confusion_mat, label):
@@ -339,7 +369,7 @@ def cal_avg_accuracy(confusion_mat):
 		f1_ms = 2 * precision * recall / (precision + recall)
 		print(recall, precision, class_rate, f1_ms)
 		res.append((index, recall, precision, class_rate, f1_ms))
-	
+
 	return res
 
 
@@ -383,7 +413,7 @@ def shuffle_data(dataset):
 '''
 Main program starts here
 '''
-d = load_data('clean')
+d = load_data('noisy')
 
 # t = decision_tree_learning(d, 0)
 
@@ -393,7 +423,7 @@ d = load_data('clean')
 
 # 10-fold cross validation
 shuffled_data = shuffle_data(d)
-cross_validation(shuffled_data, 10)
+cross_validation_prune(shuffled_data, 10)
 
 # graph = pydot.Dot(graph_type='graph')
 # visit(t[0])
