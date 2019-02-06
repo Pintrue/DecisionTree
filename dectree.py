@@ -75,7 +75,8 @@ def find_column_split(dataset, wifi):
 		if last_data[LABEL_IDX] != s_right[0][LABEL_IDX]:
 			if last_data[wifi] != s_right[0][wifi]:
 				split_val = (last_data[wifi] + s_right[0][wifi]) / 2.0
-				info_gains.append((i + 1, info_gain(s_left, s_right), split_val))
+				info_gains.append((i + 1, info_gain(s_left, s_right), \
+									split_val))
 
 		last_data = s_right[0]
 		s_left.append(s_right.pop(0))
@@ -152,7 +153,8 @@ def find_split(dataset):
 	i = max_tuple[1]
 	sorted_dataset = sorted(dataset, \
 							key=ft.cmp_to_key( \
-								lambda x, y: cmp_data_tuple(x, y, max_tuple[0])))
+								lambda x, y: cmp_data_tuple(x, y, \
+															max_tuple[0])))
 	return (max_tuple[0], max_tuple[3], sorted_dataset[:i], sorted_dataset[i:])
 
 
@@ -178,8 +180,8 @@ def info_gain(l_dataset, r_dataset):
 	r_dataset_len = float(len(r_dataset))
 	dataset_len = l_dataset_len + r_dataset_len
 
-	remainder = (l_dataset_len / dataset_len) * cal_entropy(l_dataset) + (r_dataset_len / dataset_len) * cal_entropy(
-		r_dataset)
+	remainder = (l_dataset_len / dataset_len) * cal_entropy(l_dataset) + \
+					(r_dataset_len / dataset_len) * cal_entropy(r_dataset)
 
 	return cal_entropy(l_dataset + r_dataset) - remainder
 
@@ -262,10 +264,12 @@ def cross_validation(dataset, fold_num):
 
 	for k in range(fold_num):
 		validate_data = np.array(dataset[k * fold_len : (k + 1) * fold_len])
-		train_data = np.array(dataset[: k * fold_len] + dataset[(k + 1) * fold_len:])
+		train_data = np.array(dataset[: k * fold_len] + \
+								dataset[(k + 1) * fold_len:])
 
 		tree = decision_tree_learning(train_data, 0)
-		(wrong_num, _, wrong_set, correct_set) = evaluate(tree[0], validate_data)
+		(wrong_num, _, wrong_set, correct_set) = evaluate(tree[0], \
+															validate_data)
 		cv_result.append((k, wrong_num))
 
 		print("Fold #%d has %d of wrongly labeled data, out of %d total data."
@@ -276,7 +280,8 @@ def cross_validation(dataset, fold_num):
 		for correct in correct_set:
 			confusion_mat[correct - 1][correct - 1] += 1
 
-	avg_confmat = list(map(lambda l : list(map(lambda x : x / 10.0, l)), confusion_mat))
+	avg_confmat = list(map(lambda l : list(map(lambda x : x / 10.0, l)), \
+												confusion_mat))
 	#print(avg_confmat)
 	confusion_mat = np.array(avg_confmat, dtype=np.float32)
 	print(confusion_mat)
@@ -288,31 +293,62 @@ def cross_validation(dataset, fold_num):
 
 
 def cross_validation_prune(dataset, fold_num):
-	fold_len = int(len(dataset) / fold_num)
-	# cv_result = []
-	# test_fold_index = random.randint(0, fold_num - 1)
-	for test_fold_index in range(fold_num):
-		test_data = np.array(dataset[test_fold_index * fold_len : (test_fold_index + 1) * fold_len])
-		rest_data = dataset[: test_fold_index * fold_len] + \
-						dataset[(test_fold_index + 1) * fold_len :]
-		print("Choose Fold #%d as test fold" % test_fold_index)
-		for k in range(fold_num - 1):
-			validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
-			train_data = np.array(rest_data[: k * fold_len] + rest_data[(k + 1) * fold_len :])
+	test_fold_len = int(len(dataset) / fold_num)
+	cv_result = []		# cross val. results for original trees
+	cv_result_p = []	# cross val. results for pruned trees
+	cm = np.full((LABEL_NUM, LABEL_NUM), 0)	#conf. mat. for original
+	cm_p = np.full((LABEL_NUM, LABEL_NUM), 0)	#conf. mat. for pruned
 
-			tree = decision_tree_learning(train_data, 0)
-			(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], test_data)
-			# pruned_t = prune(tree[0], validate_data)
-			prune(tree[0], validate_data)
-			(wrong_num2, _, wrong_set2, correct_set2) = evaluate(tree[0], test_data)
+	test_fold_index = random.randint(0, fold_num - 1)	# 10% is test data
 
-			print(("\tFold #%d has %d of wrong before pruning, " + \
-			"%d after pruning, out of %d total data.")
-					% (k, wrong_num1, wrong_num2, fold_len))
-			# cv_result.append((k, wrong_num))
+	test_data = np.array(dataset[test_fold_index * test_fold_len : \
+							(test_fold_index + 1) * test_fold_len])
+	rest_data = dataset[: test_fold_index * test_fold_len] + \
+							dataset[(test_fold_index + 1) * test_fold_len :]
 
-			# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
-			# 	  % (k, wrong_num, fold_len))
+	fold_len = int((len(dataset) - test_fold_len) / fold_num)
+	
+	for k in range(fold_num):	# do 10-fold cv on remaining 90%
+		validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
+		train_data = np.array(rest_data[: k * fold_len] + \
+						rest_data[(k + 1) * fold_len :])
+		tree = decision_tree_learning(train_data, 0)
+		(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], \
+																test_data)
+		prune(tree[0], validate_data)
+		(wrong_num2, _, wrong_set2, correct_set2) = evaluate(tree[0], \
+																test_data)
+		print(("\tFold #%d has %d of wrong before pruning, " + \
+				"%d after pruning, out of %d total data.")
+				% (k, wrong_num1, wrong_num2, fold_len))
+		# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
+		# 	  % (k, wrong_num, fold_len))
+		cv_result.append((k, wrong_num1))
+		cv_result_p.append((k, wrong_num2))
+		for wrong in wrong_set1:
+			cm[wrong[0] - 1][wrong[1] - 1] += 1
+		for wrong in wrong_set2:
+			cm_p[wrong[0] - 1][wrong[1] - 1] += 1
+		for correct in correct_set1:
+			cm[correct - 1][correct - 1] += 1
+		for correct in correct_set2:
+			cm_p[correct - 1][correct - 1] += 1
+
+	avg_confmat1 = list(map(lambda l : list(map(lambda x : x / \
+													float(fold_num), l)), cm))
+	avg_confmat2 = list(map(lambda l : list(map(lambda x : x / \
+													float(fold_num), l)), cm_p))
+	#print(avg_confmat)
+	cm1 = np.array(avg_confmat1, dtype=np.float32)
+	cm2 = np.array(avg_confmat2, dtype=np.float32)
+	print(cm1)
+	print(cm2)
+
+	cal_avg_accuracy(cm1)
+	plot_cm(cm1)
+	# cal_avg_accuracy(cm2)
+	plot_cm(cm2)
+
 
 
 def prune_help(node, tree, validate_data):
@@ -386,7 +422,8 @@ def cal_avg_accuracy(confusion_mat):
 def plot_cm(confusion_mat):
 	plt.imshow(confusion_mat, cmap=plt.cm.Blues)
 	classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
-	plt.title('Confusion Matrix - Average Cross Validation Classification Results')
+	plt.title('Confusion Matrix - Average Cross Validation' +
+				'Classification Results')
 	plt.ylabel('Actual label')
 	plt.xlabel('Predicted label')
 	tick_marks = np.arange(len(classNames))
