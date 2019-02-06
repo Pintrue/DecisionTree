@@ -345,9 +345,9 @@ def cross_validation_prune(dataset, fold_num):
 	print(cm2)
 
 	cal_avg_accuracy(cm1)
-	plot_cm(cm1)
-	# cal_avg_accuracy(cm2)
-	plot_cm(cm2)
+	cal_avg_accuracy(cm2)
+	plot_cm(cm1, 'Confusion Matrix - Original')
+	plot_cm(cm2, 'Confusion Matrix - Pruned')
 
 
 
@@ -407,23 +407,27 @@ def metrics(confusion_mat, label):
 
 def cal_avg_accuracy(confusion_mat):
 	res = []
+	(tp, fp, fn, tn) = metrics(confusion_mat, 1)
+	class_rate = round((tp + tn) / (tp + tn + fp + fn), 3)
+	# class_rates in each label are the same
+
 	for index in range(LABEL_START, LABEL_END):
 		(tp, fp, fn, tn) = metrics(confusion_mat, index)
-		recall = tp / (tp + fn)
-		precision = tp / (tp + fp)
-		class_rate = (tp + tn) / (tp + tn + fp + fn)
-		f1_ms = 2 * precision * recall / (precision + recall)
+		# print(tp, fp, fn, tn)
+		recall = round(tp / (tp + fn), 3)
+		precision = round(tp / (tp + fp), 3)
+		# class_rate = (tp + tn) / (tp + tn + fp + fn)
+		f1_ms = round(2 * precision * recall / (precision + recall), 3)
 		print(recall, precision, class_rate, f1_ms)
 		res.append((index, recall, precision, class_rate, f1_ms))
 
 	return res
 
 
-def plot_cm(confusion_mat):
+def plot_cm(confusion_mat, title):
 	plt.imshow(confusion_mat, cmap=plt.cm.Blues)
 	classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
-	plt.title('Confusion Matrix - Average Cross Validation' +
-				'Classification Results')
+	plt.title(title)
 	plt.ylabel('Actual label')
 	plt.xlabel('Predicted label')
 	tick_marks = np.arange(len(classNames))
