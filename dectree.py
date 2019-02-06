@@ -352,7 +352,8 @@ def prune(tree, validate_data):
     i = 0
     while True:
         this_wrong_num = evaluate(tree, validate_data)[0]
-        next_wrong_num = prune_help(tree, tree, validate_data)
+        prune_help(tree, tree, validate_data)
+        next_wrong_num = evaluate(tree, validate_data)[0]
         i += 1
         print i
         if this_wrong_num == next_wrong_num:
