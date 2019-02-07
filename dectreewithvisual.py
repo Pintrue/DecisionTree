@@ -453,7 +453,7 @@ def visual(dataset):
 
 def visuals(node):
     if node['leaf'] == True:
-        line='%s' %node['leaf']
+        line='leaf %f' %node['leaf']
         width=len(line)
         height=1
         middle=width//2
