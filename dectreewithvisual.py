@@ -446,42 +446,64 @@ def shuffle_data(dataset):
 	return shuffled
 
 def visual(dataset):
-    tree = decision_tree_learning(dataset, 0)
-    lines,_,_,_=visuals(tree[0])
+    tree = decision_tree_learning(dataset, 0) #get the tree
+    lines,_,_,_=visuals(tree[0]) #get the strings for output tree
     for line in lines:
         print(line)
 
-def visuals(node):
-    if node['leaf'] == True:
+def visuals(node): 
+    if node['leaf'] == True:	#when the node is leaf no further recursion and output leaf status
         line='leaf %f' %node['leaf']
         width=len(line)
         height=1
         middle=width//2
         return [line],width,height,middle
     
-    if node['right'] is None:
-        lines,m,q,y=visuals(node)
-        s='%s' %node['val']
-        length=len(s)
-        first_line = (y + 1) * ' ' + (m - y - 1) * '_' + s
-        second_line = y * ' ' + '/' + (m - y - 1 + length) * ' '
-        shifts = [line + length * ' ' for line in lines]
-        return [first_line, second_line] + shifts, m + length, q + 2, m + length // 2
+    if node['right'] is None:	#when the right child is none set the status as leaf 0 and 
+        line='leaf 0.000000' #right child recursion 
+        m=len(line)
+        q=1
+        y=m//2
+        right=[line]
+        l_branch=node['left']
+        left,n,p,x=visuals(l_branch)
+        s='x<%s' % node['val'] #get the value of node
+        length=len(s) 
+        first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
+        second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
+        if p < q:
+            left += [n * ' '] * (q - p)
+        elif q < p:
+            right += [m * ' '] * (p - q)
+        zips = zip(left, right)
+        lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
+        return lines, n + m + length, max(p, q) + 2, n + length // 2
 
-    if node['left'] is None:
-        lines,n,p,x=visuals(node)
-        s='%s' % node['val']
+    if node['left'] is None:	#when the right child is none set the status as leaf 0 and
+        line= 'leaf 0.000000'   #left child rcursion 
+        n=len(line)
+        p=1
+        x=n//2
+        left=[line]
+        r_branch=node['right']
+        right,m,q,y=visuals(r_branch)
+        s='x<%s' % node['val'] #get the value of node
         length=len(s)
-        first_line = s + x * '_' + (n - x) * ' '
-        second_line = (length + x) * ' ' + '\\' + (n - x - 1) * ' '
-        shifts = [length * ' ' + line for line in lines]
-        return [first_line, second_line] + shifts, n + length, p + 2, length // 2
+        first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
+        second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
+        if p < q:
+            left += [n * ' '] * (q - p)
+        elif q < p:
+            right += [m * ' '] * (p - q)
+        zips = zip(left, right)
+        lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
+        return lines, n + m + length, max(p, q) + 2, n + length // 2
     
     l_branch=node['left']
     r_branch=node['right']
     left,n,p,x=visuals(l_branch)
     right,m,q,y=visuals(r_branch)
-    s='%s' % node['val']
+    s='x<%s' % node['val'] #get the value of node
     length=len(s)
     first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
     second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
@@ -490,7 +512,7 @@ def visuals(node):
     elif q < p:
         right += [m * ' '] * (p - q)
     zips = zip(left, right)
-    lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips]
+    lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
     return lines, n + m + length, max(p, q) + 2, n + length // 2
 # def draw(parent_name, child_name):
 # 	edge = pydot.Edge(parent_name, child_name)
