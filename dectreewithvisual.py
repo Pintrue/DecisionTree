@@ -460,7 +460,7 @@ def visuals(node):
         return [line],width,height,middle
     
     if node['right'] is None:	#when the right child is none set the status as leaf 0 and 
-        line='leaf 0.000000' #right child recursion 
+        line='leaf 0.000000' #left child recursion 
         m=len(line)
         q=1
         y=m//2
@@ -480,7 +480,7 @@ def visuals(node):
         return lines, n + m + length, max(p, q) + 2, n + length // 2
 
     if node['left'] is None:	#when the left child is none set the status as leaf 0 and
-        line= 'leaf 0.000000'   #left child rcursion 
+        line= 'leaf 0.000000'   #right child rcursion 
         n=len(line)
         p=1
         x=n//2
