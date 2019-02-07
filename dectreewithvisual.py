@@ -479,7 +479,7 @@ def visuals(node):
         lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
         return lines, n + m + length, max(p, q) + 2, n + length // 2
 
-    if node['left'] is None:	#when the right child is none set the status as leaf 0 and
+    if node['left'] is None:	#when the left child is none set the status as leaf 0 and
         line= 'leaf 0.000000'   #left child rcursion 
         n=len(line)
         p=1
@@ -501,7 +501,7 @@ def visuals(node):
     
     l_branch=node['left']
     r_branch=node['right']
-    left,n,p,x=visuals(l_branch)
+    left,n,p,x=visuals(l_branch)	#left and right child recursion
     right,m,q,y=visuals(r_branch)
     s='x<%s' % node['val'] #get the value of node
     length=len(s)
