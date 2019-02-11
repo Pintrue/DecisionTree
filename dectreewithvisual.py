@@ -341,13 +341,15 @@ def cross_validation_prune(dataset, fold_num):
 	#print(avg_confmat)
 	cm1 = np.array(avg_confmat1, dtype=np.float32)
 	cm2 = np.array(avg_confmat2, dtype=np.float32)
-	print(cm1)
-	print(cm2)
-
+	#print(cm1)
+	#print(cm2)
+	lines,_,_,_=visuals(tree[0]) #get the strings for output tree
+	for line in lines:
+		print(line)
 	cal_avg_accuracy(cm1)
 	cal_avg_accuracy(cm2)
-	plot_cm(cm1, 'Confusion Matrix - Original')
-	plot_cm(cm2, 'Confusion Matrix - Pruned')
+	#plot_cm(cm1, 'Confusion Matrix - Original')
+	#plot_cm(cm2, 'Confusion Matrix - Pruned')
 
 
 
@@ -534,20 +536,19 @@ def visuals(node):
 '''
 Main program starts here
 '''
-d = load_data('noisy')
+d = load_data('clean')
 
 # t = decision_tree_learning(d, 0)
 
 # tst = load_data('clean')
 # (w, t) = validate(t[0], tst)
 # print("%d wrongly labeled, out of %d test data." % (w, t))
-f = open("noise.out", 'w')
+f = open("clean.out", 'w')
 sys.stdout = f
 visual(d)
 f.close()
 # 10-fold cross validation
-#shuffled_data = shuffle_data(d)
-#cross_validation_prune(shuffled_data, 10)
+
 
 # graph = pydot.Dot(graph_type='graph')
 # visit(t[0])
