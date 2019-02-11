@@ -302,9 +302,9 @@ def cross_validation_prune(dataset, fold_num):
 	rest_data = dataset[: test_fold_index * test_fold_len] + \
 							dataset[(test_fold_index + 1) * test_fold_len :]
 
-	fold_len = int((len(dataset) - test_fold_len) / fold_num)
+	fold_len = int((len(dataset) - test_fold_len) / (fold_num - 1))
 	
-	for k in range(fold_num):	# do 10-fold cv on remaining 90%
+	for k in range(fold_num - 1):	# do 10-fold cv on remaining 90%
 		validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
 		train_data = np.array(rest_data[: k * fold_len] + \
 						rest_data[(k + 1) * fold_len :])
@@ -339,14 +339,15 @@ def cross_validation_prune(dataset, fold_num):
 			cm_p[correct - 1][correct - 1] += 1
 
 	avg_confmat1 = list(map(lambda l : list(map(lambda x : x / \
-													float(fold_num), l)), cm))
+													float(fold_num - 1), l)), cm))
 	avg_confmat2 = list(map(lambda l : list(map(lambda x : x / \
-													float(fold_num), l)), cm_p))
+													float(fold_num - 1), l)), cm_p))
 
 	cm1 = np.array(avg_confmat1, dtype=np.float32)
 	cm2 = np.array(avg_confmat2, dtype=np.float32)
-	print('\n')
+	print('\nRaw confusion matrix for ORIGINAL decision tree.')
 	print(cm1)
+	print('\nRaw confusion matrix for PRUNED decision tree.')
 	print(cm2)
 
 	print("\nBefore pruning...\n")
@@ -362,8 +363,10 @@ def cross_validation_prune(dataset, fold_num):
 	print("\nAverage depths before and after pruning are %d and %d," \
 		" respectively." % (avg_ori_dep, avg_pru_dep))
 
-	plot_cm(cm1, 'Original')
-	plot_cm(cm2, 'Pruned')
+	print("\nPrinting the confusion matrix visualization.")
+	# plot_cm(cm1, title='Original')
+	# plot_cm(cm2, title='Pruned')
+	plot_cm(cm1, cm2=cm2)
 
 
 def prune_help(node, tree, validate_data):
@@ -387,7 +390,7 @@ def prune_help(node, tree, validate_data):
 			if prune_to_l <= no_prune:
 				node['room'] = l_branch['room']
 				node['leaf'] = True
-				# clear other fields, todo
+
 			else:
 				node['leaf'] = False
 				del node['room']
@@ -395,7 +398,7 @@ def prune_help(node, tree, validate_data):
 			if prune_to_r <= no_prune:
 				node['room'] = r_branch['room']
 				node['leaf'] = True
-				# clear other fields, todo
+
 			else:
 				node['leaf'] = False
 				del node['room']
@@ -452,18 +455,39 @@ def cal_avg_accuracy(confusion_mat):
 	return res
 
 
-def plot_cm(confusion_mat, title):
-	plt.imshow(confusion_mat, cmap=plt.cm.Blues)
-	classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
-	plt.title('Confusion Matrix - ' + title)
-	plt.ylabel('Actual label')
-	plt.xlabel('Predicted label')
-	tick_marks = np.arange(len(classNames))
-	plt.xticks(tick_marks, classNames, rotation=45)
-	plt.yticks(tick_marks, classNames)
-	plt.show()
+def plot_cm(cm1, cm2=None, title=None):
+	if cm2 is None:
+		plt.imshow(cm1, cmap=plt.cm.Blues)
+		classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
+		plt.title('Confusion Matrix - ' + title)
+		plt.ylabel('Actual label')
+		plt.xlabel('Predicted label')
+		tick_marks = np.arange(len(classNames))
+		plt.xticks(tick_marks, classNames, rotation=45)
+		plt.yticks(tick_marks, classNames)
+		plt.show()
+	else:
+		plt.figure(1)
+		plt.imshow(cm1, cmap=plt.cm.Blues)
+		classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
+		plt.title('Confusion Matrix - ' + 'Original')
+		plt.ylabel('Actual label')
+		plt.xlabel('Predicted label')
+		tick_marks = np.arange(len(classNames))
+		plt.xticks(tick_marks, classNames, rotation=45)
+		plt.yticks(tick_marks, classNames)
 
-
+		plt.figure(2)
+		plt.imshow(cm2, cmap=plt.cm.Blues)
+		classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
+		plt.title('Confusion Matrix - ' + 'Pruned')
+		plt.ylabel('Actual label')
+		plt.xlabel('Predicted label')
+		tick_marks = np.arange(len(classNames))
+		plt.xticks(tick_marks, classNames, rotation=45)
+		plt.yticks(tick_marks, classNames)
+		plt.show()
+		
 '''
 Randomly shuffle the original dataset,
 which does not mutate the original dataset.
