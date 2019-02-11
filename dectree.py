@@ -287,7 +287,7 @@ def cross_validation(dataset, fold_num):
 	print(confusion_mat)
 
 	cal_avg_accuracy(confusion_mat)
-	plot_cm(confusion_mat)
+	plot_cm(confusion_mat, "10-fold C.V")
 
 	return (cv_result, confusion_mat)
 
@@ -320,7 +320,7 @@ def cross_validation_prune(dataset, fold_num):
 																test_data)
 		print(("\tFold #%d has %d of wrong before pruning, " + \
 				"%d after pruning, out of %d total data.")
-				% (k, wrong_num1, wrong_num2, fold_len))
+				% (k, wrong_num1, wrong_num2, test_fold_len))
 		# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
 		# 	  % (k, wrong_num, fold_len))
 		cv_result.append((k, wrong_num1))
@@ -346,8 +346,8 @@ def cross_validation_prune(dataset, fold_num):
 
 	cal_avg_accuracy(cm1)
 	cal_avg_accuracy(cm2)
-	plot_cm(cm1, 'Confusion Matrix - Original')
-	plot_cm(cm2, 'Confusion Matrix - Pruned')
+	plot_cm(cm1, 'Original')
+	plot_cm(cm2, 'Pruned')
 
 
 
@@ -369,7 +369,7 @@ def prune_help(node, tree, validate_data):
 		node['room'] = r_branch['room']
 		prune_to_r = evaluate(tree, validate_data)[0]
 		if prune_to_l < prune_to_r:
-			if prune_to_l < no_prune:
+			if prune_to_l <= no_prune:
 				node['room'] = l_branch['room']
 				node['leaf'] = True
 				# clear other fields, todo
@@ -377,7 +377,7 @@ def prune_help(node, tree, validate_data):
 				node['leaf'] = False
 				del node['room']
 		else: # prune_to_r <= prune_to_l
-			if prune_to_r < no_prune:
+			if prune_to_r <= no_prune:
 				node['room'] = r_branch['room']
 				node['leaf'] = True
 				# clear other fields, todo
@@ -427,7 +427,7 @@ def cal_avg_accuracy(confusion_mat):
 def plot_cm(confusion_mat, title):
 	plt.imshow(confusion_mat, cmap=plt.cm.Blues)
 	classNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4']
-	plt.title(title)
+	plt.title('Confusion Matrix - ' + title)
 	plt.ylabel('Actual label')
 	plt.xlabel('Predicted label')
 	tick_marks = np.arange(len(classNames))
