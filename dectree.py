@@ -408,16 +408,16 @@ def metrics(confusion_mat, label):
 def cal_avg_accuracy(confusion_mat):
 	res = []
 	(tp, fp, fn, tn) = metrics(confusion_mat, 1)
-	class_rate = round((tp + tn) / (tp + tn + fp + fn), 3)
+	class_rate = round((tp + tn) / (tp + tn + fp + fn), 5)
 	# class_rates in each label are the same
 
 	for index in range(LABEL_START, LABEL_END):
 		(tp, fp, fn, tn) = metrics(confusion_mat, index)
 		# print(tp, fp, fn, tn)
-		recall = round(tp / (tp + fn), 3)
-		precision = round(tp / (tp + fp), 3)
+		recall = round(tp / (tp + fn), 5)
+		precision = round(tp / (tp + fp), 5)
 		# class_rate = (tp + tn) / (tp + tn + fp + fn)
-		f1_ms = round(2 * precision * recall / (precision + recall), 3)
+		f1_ms = round(2 * precision * recall / (precision + recall), 5)
 		print(recall, precision, class_rate, f1_ms)
 		res.append((index, recall, precision, class_rate, f1_ms))
 
