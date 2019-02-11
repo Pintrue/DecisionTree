@@ -1,13 +1,4 @@
-	Fold #0 has 2 of wrong before pruning, 1 after pruning, out of 180 total data.
-	Fold #1 has 4 of wrong before pruning, 4 after pruning, out of 180 total data.
-	Fold #2 has 2 of wrong before pruning, 2 after pruning, out of 180 total data.
-	Fold #3 has 6 of wrong before pruning, 6 after pruning, out of 180 total data.
-	Fold #4 has 5 of wrong before pruning, 5 after pruning, out of 180 total data.
-	Fold #5 has 3 of wrong before pruning, 3 after pruning, out of 180 total data.
-	Fold #6 has 5 of wrong before pruning, 5 after pruning, out of 180 total data.
-	Fold #7 has 6 of wrong before pruning, 6 after pruning, out of 180 total data.
-	Fold #8 has 2 of wrong before pruning, 2 after pruning, out of 180 total data.
-	Fold #9 has 3 of wrong before pruning, 3 after pruning, out of 180 total data.
+
                                                                                                                   ___________________________________x<-54.5_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________                                                 
                                                                                                                  /                                                                                                                                                                                                                                                                                                                       \                                                
                                                                                         ______________________x<-59.0______________________                                                                  _________________________________________________________________________________________________________________________________________________________________________________________________________________________x<-43.5_________                                    
@@ -31,11 +22,3 @@ Room 1           __x<-55.5_________                                             
                                                                                                                                                                                                                                                                                                                __x<-55.5___          Room 3                                                                                                                                               
                                                                                                                                                                                                                                                                                                               /            \                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            Room 3       Room 2                                                                                                                                                            
-0.998 0.985 0.996 0.991
-0.993 0.97 0.996 0.981
-0.956 0.97 0.996 0.963
-0.976 1.0 0.996 0.988
-1.0 0.985 0.996 0.992
-0.993 0.97 0.996 0.981
-0.956 0.972 0.996 0.964
-0.976 1.0 0.996 0.988
