@@ -291,7 +291,7 @@ def cross_validation(dataset, fold_num):
 
 	return (cv_result, confusion_mat)
 
-	
+
 def cross_validation_prune(dataset, fold_num):
 	test_fold_len = int(len(dataset) / fold_num)
 	cv_result = []		# cross val. results for original trees
@@ -307,7 +307,7 @@ def cross_validation_prune(dataset, fold_num):
 							dataset[(test_fold_index + 1) * test_fold_len :]
 
 	fold_len = int((len(dataset) - test_fold_len) / fold_num)
-	
+
 	for k in range(fold_num):	# do 10-fold cv on remaining 90%
 		validate_data = np.array(rest_data[k * fold_len : (k + 1) * fold_len])
 		train_data = np.array(rest_data[: k * fold_len] + \
@@ -451,7 +451,7 @@ def visual(dataset):
 	for line in lines:
 		print(line)
 
-def visuals(node): 
+def visuals(node):
 	if node['leaf'] == True:	#when the node is leaf no further recursion and output leaf status
 		# line='leaf %f' %node['leaf']
 		line = 'Room %.0f' % node['room']	# Room number
@@ -459,62 +459,63 @@ def visuals(node):
 		height=1
 		middle=width//2
 		return [line],width,height,middle
-	
-	if node['right'] is None:	#when the right child is none set the status as leaf 0 and 
-		line='leaf 0' #left child recursion 
+
+	if node['right'] is None:	#when the right child is none set the status as leaf 0 and
+		line='leaf 0.000000' #left child recursion
 		m=len(line)
-		q=0
+		q=1
 		y=m//2
 		right=[line]
 		l_branch=node['left']
 		left,n,p,x=visuals(l_branch)
 		s='x<%s' % node['val'] #get the value of node
-		length=len(s) 
-		first_line =  ' ' + s + ' '
-		second_line =  '/' + length  * ' ' + '\\' 
+		length=len(s)
+		first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
+		second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
 		if p < q:
 			left += [n * ' '] * (q - p)
 		elif q < p:
 			right += [m * ' '] * (p - q)
 		zips = zip(left, right)
 		lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
-		return lines, 2 +  length, max(p, q) + 2, x + length // 2
+		return lines, n + m + length, max(p, q) + 2, n + length // 2
 
 	if node['left'] is None:	#when the left child is none set the status as leaf 0 and
-		line= 'leaf 0'   #right child rcursion 
+		line= 'leaf 0.000000'   #right child rcursion
 		n=len(line)
-		p=0
+		p=1
 		x=n//2
 		left=[line]
 		r_branch=node['right']
 		right,m,q,y=visuals(r_branch)
 		s='x<%s' % node['val'] #get the value of node
 		length=len(s)
-		first_line =  ' '  + s +  ' '
-		second_line =  '/' + length  * ' ' + '\\' 
+		first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
+		second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
 		if p < q:
 			left += [n * ' '] * (q - p)
 		elif q < p:
 			right += [m * ' '] * (p - q)
 		zips = zip(left, right)
 		lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
-		return lines, 2  + length, max(p, q) + 2, x + length // 2
-	
+		return lines, n + m + length, max(p, q) + 2, n + length // 2
+
 	l_branch=node['left']
 	r_branch=node['right']
 	left,n,p,x=visuals(l_branch)	#left and right child recursion
 	right,m,q,y=visuals(r_branch)
 	s='x<%s' % node['val'] #get the value of node
 	length=len(s)
-	first_line =  ' '+ s + ' '
-	second_line = '/' +  length  * ' ' + '\\' 
+	first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
+	second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
 	if p < q:
 		left += [n * ' '] * (q - p)
 	elif q < p:
 		right += [m * ' '] * (p - q)
 	zips = zip(left, right)
 	lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
-	return lines, 2 +  length, max(p, q) + 2, x + length // 2
+	return lines, n + m + length, max(p, q) + 2, n + length // 2
+
 # def draw(parent_name, child_name):
 # 	edge = pydot.Edge(parent_name, child_name)
 # 	graph.add_edge(edge)
@@ -540,7 +541,7 @@ d = load_data('noisy')
 # tst = load_data('clean')
 # (w, t) = validate(t[0], tst)
 # print("%d wrongly labeled, out of %d test data." % (w, t))
-f = open("test.out", 'w')
+f = open("noise.out", 'w')
 sys.stdout = f
 visual(d)
 f.close()
