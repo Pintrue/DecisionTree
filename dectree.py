@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 import functools as ft
 import math
@@ -18,20 +19,14 @@ from a file specified by argument dataset, which
 can either be clean or noisy.
 '''
 def load_data(dataset):
-	file_name = ''
-	if dataset == 'clean':
-		file_name = 'clean_dataset.txt'
-	elif dataset == 'noisy':
-		file_name = 'noisy_dataset.txt'
-	elif dataset == 'test':
-		file_name = 'test_dataset.txt'
+	file_path = os.path.join('wifi_db', dataset)
+	if os.path.isfile(file_path):
+		data = np.loadtxt(file_path)
 	else:
-		print("Unrecognized filename.")
-		return
-
-	file_path = os.path.join('wifi_db', file_name)
-
-	data = np.loadtxt(file_path)
+		print("Cannot find the file: " + dataset + ".")
+		print("Make sure it is placed in the /wifi_db directory at the root,")
+		print("\tand only input the filename, not the relative path.")
+		sys.exit()
 	return data
 
 
@@ -298,6 +293,8 @@ def cross_validation_prune(dataset, fold_num):
 	cv_result_p = []	# cross val. results for pruned trees
 	cm = np.full((LABEL_NUM, LABEL_NUM), 0)	#conf. mat. for original
 	cm_p = np.full((LABEL_NUM, LABEL_NUM), 0)	#conf. mat. for pruned
+	ori_depths = []	# depths of 10 trees before pruning
+	pru_depths = [] # depths of 10 trees after pruning
 
 	test_fold_index = random.randint(0, fold_num - 1)	# 10% is test data
 
@@ -315,14 +312,22 @@ def cross_validation_prune(dataset, fold_num):
 		tree = decision_tree_learning(train_data, 0)
 		(wrong_num1, _, wrong_set1, correct_set1) = evaluate(tree[0], \
 																test_data)
+		ori_depth = get_depth(tree[0], 0)
+		ori_depths.append(ori_depth)
+
+		# prune on the original tree
 		prune(tree[0], validate_data)
 		(wrong_num2, _, wrong_set2, correct_set2) = evaluate(tree[0], \
 																test_data)
-		print(("\tFold #%d has %d of wrong before pruning, " + \
+		pru_depth = get_depth(tree[0], 0)
+		pru_depths.append(pru_depth)
+
+		print(("Fold #%d has %d of wrong before pruning, " + \
 				"%d after pruning, out of %d total data.")
 				% (k, wrong_num1, wrong_num2, test_fold_len))
-		# print("Fold #%d has %d of wrongly labeled data, out of %d total data."
-		# 	  % (k, wrong_num, fold_len))
+		print('\tOriginal depth is %d' % ori_depth)
+		print('\tPruned depth is %d' % pru_depth)
+
 		cv_result.append((k, wrong_num1))
 		cv_result_p.append((k, wrong_num2))
 		for wrong in wrong_set1:
@@ -338,17 +343,28 @@ def cross_validation_prune(dataset, fold_num):
 													float(fold_num), l)), cm))
 	avg_confmat2 = list(map(lambda l : list(map(lambda x : x / \
 													float(fold_num), l)), cm_p))
-	#print(avg_confmat)
+
 	cm1 = np.array(avg_confmat1, dtype=np.float32)
 	cm2 = np.array(avg_confmat2, dtype=np.float32)
+	print('\n')
 	print(cm1)
 	print(cm2)
 
+	print("\nBefore pruning...\n")
+	print("recall, precision, class_rate, f1_ms")
 	cal_avg_accuracy(cm1)
+
+	print("\nAfter pruning...\n")
+	print("recall, precision, class_rate, f1_ms")
 	cal_avg_accuracy(cm2)
+
+	avg_ori_dep = sum(ori_depths) / len(ori_depths)
+	avg_pru_dep = sum(pru_depths) / len(pru_depths)
+	print("\nAverage depths before and after pruning are %d and %d," \
+		" respectively." % (avg_ori_dep, avg_pru_dep))
+
 	plot_cm(cm1, 'Original')
 	plot_cm(cm2, 'Pruned')
-
 
 
 def prune_help(node, tree, validate_data):
@@ -395,6 +411,19 @@ def prune(tree, validate_data):
 		# print(i)
 		if this_wrong_num == next_wrong_num:
 			break
+
+
+def get_depth(node, depth):
+	if node['leaf'] == True:
+		return depth
+	l_branch = node['left']
+	r_branch = node['right']
+	if l_branch['leaf'] == True and r_branch['leaf'] == False:
+		return get_depth(r_branch, depth + 1)
+	elif l_branch['leaf'] == False and r_branch['leaf'] == True:
+		return get_depth(l_branch, depth + 1)
+	else:
+		return max(get_depth(r_branch, depth + 1), get_depth(l_branch, depth + 1))
 
 
 def metrics(confusion_mat, label):
@@ -446,38 +475,23 @@ def shuffle_data(dataset):
 	return shuffled
 
 
-# def draw(parent_name, child_name):
-# 	edge = pydot.Edge(parent_name, child_name)
-# 	graph.add_edge(edge)
-#
-#
-# def visit(node, parent=None):
-# 	if node['leaf'] == False:
-# 		if parent:
-# 			draw(parent, str(node['attr']) + ' | %f' % node['val'])
-# 		visit(node['left'], str(node['attr']) + ' | %f' % node['val'])
-# 		visit(node['right'], str(node['attr']) + ' | %f' % node['val'])
-# 	else:
-# 		draw(parent, 'Room %f' % node['room'])
-
 
 '''
 Main program starts here
 '''
-d = load_data('noisy')
 
-# t = decision_tree_learning(d, 0)
+def main():
+	arg_len = len(sys.argv)
+	if arg_len != 2:
+		print("Expecting 1 argument, actually received %d arguments." % (arg_len - 1))
+		sys.exit()
 
-# tst = load_data('clean')
-# (w, t) = validate(t[0], tst)
-# print("%d wrongly labeled, out of %d test data." % (w, t))
+	data_f_name = sys.argv[1]
+	d = load_data(data_f_name)
+	
+	# 10-fold cross validation
+	shuffled_data = shuffle_data(d)
+	cross_validation_prune(shuffled_data, 10)
 
-# 10-fold cross validation
-shuffled_data = shuffle_data(d)
-cross_validation_prune(shuffled_data, 10)
-
-# graph = pydot.Dot(graph_type='graph')
-# visit(t[0])
-# graph.write_png("1.png")
-
-# print(t)
+if __name__ == "__main__":
+	main()
