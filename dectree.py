@@ -19,13 +19,12 @@ from a file specified by argument dataset, which
 can either be clean or noisy.
 '''
 def load_data(dataset):
-	file_path = os.path.join('wifi_db', dataset)
-	if os.path.isfile(file_path):
-		data = np.loadtxt(file_path)
+	if os.path.isfile(dataset):
+		data = np.loadtxt(dataset)
 	else:
 		print("Cannot find the file: " + dataset + ".")
-		print("Make sure it is placed in the /wifi_db directory at the root,")
-		print("\tand only input the filename, not the relative path.")
+		print("Make sure it is placed in the root directory, " +
+			"or a sub-directory at the root.")
 		sys.exit()
 	return data
 
