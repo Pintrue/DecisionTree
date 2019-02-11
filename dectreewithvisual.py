@@ -5,7 +5,7 @@ import math
 import random
 import matplotlib.pyplot as plt
 # import pydot
-
+import sys
 WIFI_NUM = 7
 LABEL_IDX = WIFI_NUM
 LABEL_NUM = 4
@@ -461,44 +461,44 @@ def visuals(node):
 		return [line],width,height,middle
 	
 	if node['right'] is None:	#when the right child is none set the status as leaf 0 and 
-		line='leaf 0.000000' #left child recursion 
+		line='leaf 0' #left child recursion 
 		m=len(line)
-		q=1
+		q=0
 		y=m//2
 		right=[line]
 		l_branch=node['left']
 		left,n,p,x=visuals(l_branch)
 		s='x<%s' % node['val'] #get the value of node
 		length=len(s) 
-		first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
-		second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
+		first_line =  ' ' + s + ' '
+		second_line =  '/' + length  * ' ' + '\\' 
 		if p < q:
 			left += [n * ' '] * (q - p)
 		elif q < p:
 			right += [m * ' '] * (p - q)
 		zips = zip(left, right)
 		lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
-		return lines, n + m + length, max(p, q) + 2, n + length // 2
+		return lines, 2 +  length, max(p, q) + 2, x + length // 2
 
 	if node['left'] is None:	#when the left child is none set the status as leaf 0 and
-		line= 'leaf 0.000000'   #right child rcursion 
+		line= 'leaf 0'   #right child rcursion 
 		n=len(line)
-		p=1
+		p=0
 		x=n//2
 		left=[line]
 		r_branch=node['right']
 		right,m,q,y=visuals(r_branch)
 		s='x<%s' % node['val'] #get the value of node
 		length=len(s)
-		first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
-		second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
+		first_line =  ' '  + s +  ' '
+		second_line =  '/' + length  * ' ' + '\\' 
 		if p < q:
 			left += [n * ' '] * (q - p)
 		elif q < p:
 			right += [m * ' '] * (p - q)
 		zips = zip(left, right)
 		lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
-		return lines, n + m + length, max(p, q) + 2, n + length // 2
+		return lines, 2  + length, max(p, q) + 2, x + length // 2
 	
 	l_branch=node['left']
 	r_branch=node['right']
@@ -506,15 +506,15 @@ def visuals(node):
 	right,m,q,y=visuals(r_branch)
 	s='x<%s' % node['val'] #get the value of node
 	length=len(s)
-	first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
-	second_line = x * ' ' + '/' + (n - x - 1 + length + y) * ' ' + '\\' + (m - y - 1) * ' '
+	first_line =  ' '+ s + ' '
+	second_line = '/' +  length  * ' ' + '\\' 
 	if p < q:
 		left += [n * ' '] * (q - p)
 	elif q < p:
 		right += [m * ' '] * (p - q)
 	zips = zip(left, right)
 	lines = [first_line, second_line] + [a + length * ' ' + b for a, b in zips] #plot the configuration
-	return lines, n + m + length, max(p, q) + 2, n + length // 2
+	return lines, 2 +  length, max(p, q) + 2, x + length // 2
 # def draw(parent_name, child_name):
 # 	edge = pydot.Edge(parent_name, child_name)
 # 	graph.add_edge(edge)
@@ -540,8 +540,10 @@ d = load_data('noisy')
 # tst = load_data('clean')
 # (w, t) = validate(t[0], tst)
 # print("%d wrongly labeled, out of %d test data." % (w, t))
+f = open("test.out", 'w')
+sys.stdout = f
 visual(d)
-
+f.close()
 # 10-fold cross validation
 #shuffled_data = shuffle_data(d)
 #cross_validation_prune(shuffled_data, 10)
